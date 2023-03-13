@@ -1,4 +1,5 @@
-use red_black_tree::{RedBlackTree, RedBlackTreeTrait};
+use red_black_tree::RedBlackTree;
+use tree::TreeTrait;
 
 /**
 Your library
@@ -24,7 +25,7 @@ fn main() {
         "Print the tree showing its colors and structure",
     ];
 
-    let mut tree: RedBlackTree = None;
+    let mut tree = RedBlackTree(None);
 
     loop {
         for (i, option) in options.iter().enumerate() {

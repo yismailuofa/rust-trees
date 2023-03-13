@@ -1,16 +1,21 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-#[derive(Clone, Debug, PartialEq)]
+extern crate tree;
+use tree::TreeTrait;
 
+use std::cell::RefCell;
+use std::ops::Deref;
+use std::rc::Rc;
+
+#[derive(Clone, Debug, PartialEq)]
 pub enum NodeColor {
     Red,
     Black,
 }
-type Tree = Rc<RefCell<TreeNode>>;
 
-pub type RedBlackTree = Option<Tree>;
+type Tree = Rc<RefCell<RedBlackTreeNode>>;
 
-pub struct TreeNode {
+pub struct RedBlackTree(pub Option<Tree>);
+
+pub struct RedBlackTreeNode {
     pub color: NodeColor,
     pub key: u32,
     pub parent: RedBlackTree,
@@ -18,17 +23,16 @@ pub struct TreeNode {
     pub right: RedBlackTree, // Maybe make these private later
 }
 
-pub trait RedBlackTreeTrait {
-    fn insert_node(&mut self, key: u32);
-    fn delete_node(&mut self, key: u32);
-    fn count_leaves(&self) -> u32;
-    fn height(&self) -> u32;
-    fn in_order(&self) -> Vec<u32>;
-    fn is_empty(&self) -> bool;
-    fn print_tree(&self);
+// Allows us to avoid using self.0 everywhere
+impl Deref for RedBlackTree {
+    type Target = Option<Tree>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
-impl RedBlackTreeTrait for RedBlackTree {
+impl TreeTrait for RedBlackTree {
     fn insert_node(&mut self, key: u32) {
         todo!()
     }

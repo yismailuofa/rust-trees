@@ -1,4 +1,5 @@
 use avl_tree::*;
+use tree::TreeTrait;
 
 /**
 Your library must
@@ -23,7 +24,7 @@ fn main() {
         "Print the tree showing its structure",
     ];
 
-    let mut tree: AVLTree = None;
+    let mut tree = AVLTree(None);
 
     loop {
         for (i, option) in options.iter().enumerate() {

@@ -1,28 +1,31 @@
+extern crate tree;
+use tree::TreeTrait;
+
 use std::cell::RefCell;
+use std::ops::Deref;
 use std::rc::Rc;
 
-type Tree = Rc<RefCell<TreeNode>>;
+type Tree = Rc<RefCell<AVLTreeNode>>;
 
-pub type AVLTree = Option<Tree>;
+pub struct AVLTree(pub Option<Tree>);
 
-pub struct TreeNode {
+pub struct AVLTreeNode {
     pub key: u32,
     pub parent: AVLTree,
     pub left: AVLTree,  // Maybe make these private later
     pub right: AVLTree, // Maybe make these private late
 }
 
-pub trait AVLTreeTrait {
-    fn insert_node(&mut self, key: u32);
-    fn delete_node(&mut self, key: u32);
-    fn count_leaves(&self) -> u32;
-    fn height(&self) -> u32;
-    fn in_order(&self) -> Vec<u32>;
-    fn is_empty(&self) -> bool;
-    fn print_tree(&self);
+// Allows us to avoid using self.0 everywhere
+impl Deref for AVLTree {
+    type Target = Option<Tree>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
-impl AVLTreeTrait for AVLTree {
+impl TreeTrait for AVLTree {
     fn insert_node(&mut self, key: u32) {
         todo!()
     }
