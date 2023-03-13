@@ -14,6 +14,8 @@ pub struct AVLTreeNode {
     pub parent: AVLTree,
     pub left: AVLTree,  // Maybe make these private later
     pub right: AVLTree, // Maybe make these private late
+    pub height: u32,
+    pub balance_factor: i32,
 }
 
 // Allows us to avoid using self.0 everywhere
