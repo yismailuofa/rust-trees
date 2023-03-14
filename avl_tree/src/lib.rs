@@ -37,19 +37,39 @@ impl TreeTrait for AVLTree {
     }
 
     fn count_leaves(&self) -> u32 {
-        todo!()
+        match &self.0 {
+            Some(tree) => {
+                if tree.borrow().left.is_empty() && tree.borrow().right.is_empty() {
+                    return 1;
+                }
+                else {
+                    return tree.borrow().left.count_leaves() + tree.borrow().right.count_leaves();
+                }
+            }, 
+            None => 0
+        }
     }
 
     fn height(&self) -> u32 {
-        todo!()
+        let leaves: u32 = self.count_leaves();
+
+        if leaves < 3 {
+            return leaves;
+        } else {
+            return ((leaves + 1) as f64).log2().ceil() as u32 - 1;
+        }
     }
 
-    fn in_order(&self) -> Vec<u32> {
-        todo!()
+    fn in_order(&self) {
+        
+        
     }
 
     fn is_empty(&self) -> bool {
-        todo!()
+        match &self.0 {
+            Some(_) => false,
+            None => true,
+        }
     }
 
     fn print_tree(&self) {
