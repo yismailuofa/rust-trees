@@ -34,7 +34,12 @@ impl Deref for RedBlackTree {
 
 impl TreeTrait for RedBlackTree {
     fn insert_node(&mut self, key: u32) {
-        todo!()
+        if let Some(tree) = &self.0 {
+            
+        }
+        else{
+            self.0 = Some(Rc::new(RefCell::new(RedBlackTreeNode { color: NodeColor::Red, key: key, parent: RedBlackTree(None), left: RedBlackTree(None), right: RedBlackTree(None) })));
+        }
     }
 
     fn delete_node(&mut self, key: u32) {
