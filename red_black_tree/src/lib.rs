@@ -2,7 +2,6 @@ extern crate tree;
 use tree::TreeTrait;
 
 use std::cell::RefCell;
-use std::ops::Deref;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -22,23 +21,38 @@ pub struct RedBlackTreeNode {
     pub left: RedBlackTree,  // Maybe make these private later
     pub right: RedBlackTree, // Maybe make these private later
 }
+trait RedBlackTreeOps {
+    fn rotate(&mut self, is_left: bool);
+    fn fix_tree(&mut self);
+}
 
-// Allows us to avoid using self.0 everywhere
-impl Deref for RedBlackTree {
-    type Target = Option<Tree>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
+impl RedBlackTreeOps for RedBlackTree {
+    fn rotate(&mut self, is_left: bool) {}
+    fn fix_tree(&mut self) {
+        todo!()
     }
 }
 
 impl TreeTrait for RedBlackTree {
     fn insert_node(&mut self, key: u32) {
-        if let Some(tree) = &self.0 {
+        if let Some(node) = &self.0 {
+            let mut node = node.borrow_mut();
 
-        }
-        else{
-            self.0 = Some(Rc::new(RefCell::new(RedBlackTreeNode { color: NodeColor::Black, key: key, parent: RedBlackTree(None), left: RedBlackTree(None), right: RedBlackTree(None) })));
+            if key < node.key {
+                node.left.insert_node(key);
+            } else if key > node.key {
+                node.right.insert_node(key);
+            }
+        } else {
+            self.0 = Some(Rc::new(RefCell::new(RedBlackTreeNode {
+                color: NodeColor::Red,
+                key,
+                parent: RedBlackTree(None),
+                left: RedBlackTree(None),
+                right: RedBlackTree(None),
+            })));
+
+            self.fix_tree();
         }
     }
 
