@@ -50,9 +50,30 @@ impl TreeTrait for AVLTree {
         }
     }
 
-    fn in_order(&self) {
-        
-        
+    fn in_order(&self) -> Vec<u32> {
+
+        // initialize empty vector
+        let mut vec: Vec<u32> = Vec::new();
+
+        match &self.0 {
+            Some(tree) => {
+                
+                // add left subtree
+                vec.append(&mut tree.borrow().left.in_order());
+
+                // add root
+                vec.push(tree.borrow().key);
+
+                // add right subtree
+                vec.append(&mut tree.borrow().right.in_order());
+
+                return vec;
+            },
+            None => {
+                return vec;
+            }
+        };
+
     }
 
     fn is_empty(&self) -> bool {
