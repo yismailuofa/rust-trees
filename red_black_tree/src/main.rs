@@ -3,9 +3,9 @@ use tree::{prompt_user, TreeTrait};
 
 fn main() {
     let mut tree = RedBlackTree(None);
-    tree.insert_node(1);
-    tree.insert_node(2);
-    tree.insert_node(3);
+    //tree.insert_node(None,1);
+    //tree.insert_node(None, 2);
+    //tree.insert_node(None, 3);
 
     loop {
         prompt_user(&mut tree);
