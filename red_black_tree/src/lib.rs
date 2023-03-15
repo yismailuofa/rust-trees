@@ -33,8 +33,7 @@ trait RedBlackTreeOps {
 impl Clone for RedBlackTree {
     fn clone(&self) -> Self {
         if let Some(node) = &self.0 {
-            let new_node = RedBlackTree(Some(Rc::clone(node)));
-            new_node
+            RedBlackTree(Some(Rc::clone(node)))
         } else {
             RedBlackTree(None)
         }
@@ -91,19 +90,51 @@ impl RedBlackTreeOps for RedBlackTree {
         }
     }
     fn fix_tree(&mut self) {
-        if let Some(node) = &self.0 {
-            let mut node = node.borrow_mut();
-
-            if node.parent.0.is_none() {
-                node.color = NodeColor::Black;
-            } else {
-                node.color = NodeColor::Red;
-
-                if let Some(parent) = &node.parent.0 {
-                    let parent = parent.borrow();
-                    todo!()
+        if let Some(node_ref) = &self.0 {
+            let mut node = node_ref.borrow_mut();
+            if let Some(parent_node) = &node.parent.0 {
+                let parent = parent_node.borrow_mut();
+                if parent.color == NodeColor::Red {
+                    if let Some(grandparent) = &parent.parent.0 {
+                        let mut grandparent = grandparent.borrow_mut();
+                        let uncle = if parent.key < grandparent.key {
+                            grandparent.right.clone()
+                        } else {
+                            grandparent.left.clone()
+                        };
+                        match uncle.0 {
+                            Some(uncle_node) if uncle_node.borrow().color == NodeColor::Red => {
+                                parent_node.borrow_mut().color = NodeColor::Black;
+                                uncle_node.borrow_mut().color = NodeColor::Black;
+                                grandparent.color = NodeColor::Red;
+                                parent.parent.clone().fix_tree();
+                            }
+                            _ => {
+                                if node.key < parent.key && parent.key < grandparent.key {
+                                    parent.parent.clone().right_rotate();
+                                    parent_node.borrow_mut().color = NodeColor::Black;
+                                    grandparent.color = NodeColor::Red;
+                                } else if node.key > parent.key && parent.key > grandparent.key {
+                                    parent.parent.clone().left_rotate();
+                                    parent_node.borrow_mut().color = NodeColor::Black;
+                                    grandparent.color = NodeColor::Red;
+                                } else if node.key > parent.key && parent.key < grandparent.key {
+                                    node.parent.clone().left_rotate();
+                                    parent.parent.clone().right_rotate();
+                                    node_ref.borrow_mut().color = NodeColor::Black;
+                                    grandparent.color = NodeColor::Red;
+                                } else {
+                                    node.parent.clone().right_rotate();
+                                    parent.parent.clone().left_rotate();
+                                    node_ref.borrow_mut().color = NodeColor::Black;
+                                    grandparent.color = NodeColor::Red;
+                                }
+                            }
+                        }
+                    }
                 }
             }
+            node.color = NodeColor::Black;
         }
     }
 }
@@ -156,7 +187,7 @@ impl TreeTrait for RedBlackTree {
                 right: RedBlackTree(None),
             })));
 
-            //self.fix_tree();
+            self.fix_tree();
         }
     }
 
