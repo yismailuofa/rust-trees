@@ -1,6 +1,6 @@
 extern crate tree;
 use ptree::*;
-use std::borrow::Cow;
+use std::borrow::{Cow, Borrow};
 use std::cell::RefCell;
 use std::io;
 use std::rc::Rc;
@@ -14,8 +14,10 @@ pub enum NodeColor {
 
 type Tree = Rc<RefCell<RedBlackTreeNode>>;
 
+#[derive(Debug)]
 pub struct RedBlackTree(pub Option<Tree>);
 
+#[derive(Debug)]
 pub struct RedBlackTreeNode {
     pub color: NodeColor,
     pub key: u32,
@@ -24,8 +26,8 @@ pub struct RedBlackTreeNode {
     pub right: RedBlackTree, // Maybe make these private later
 }
 trait RedBlackTreeOps {
-    fn left_rotate(&mut self);
-    fn right_rotate(&mut self);
+    fn left_rotate(&mut self) -> RedBlackTree;
+    fn right_rotate(&mut self) -> RedBlackTree;
     fn fix_tree(&mut self);
     //fn clone(&self) -> Self;
 }
@@ -41,20 +43,21 @@ impl Clone for RedBlackTree {
 }
 
 impl RedBlackTreeOps for RedBlackTree {
-    fn left_rotate(&mut self) {
+    fn left_rotate(&mut self) -> RedBlackTree{
         // assuming it is left
         if let Some(node) = &self.0 {
-            let node_ref = node.borrow_mut();
-            let node_parent = &node_ref.parent;
-            let node_right = &node_ref.right;
+            let mut node_ref = node.borrow_mut();
+            let node_parent = node_ref.parent.clone();
+            let node_right = node_ref.right.clone();
 
             if let Some(node_right_ref) = &node_right.0 {
-                let mut node_right = node_right_ref.borrow_mut();
-                node.borrow_mut().right = node_right.left.clone();
-                node_right.parent = node_ref.parent.clone();
-                node_right.left = self.clone();
+                let mut node_right_ref = node_right_ref.borrow_mut();
+                node_ref.right = node_right_ref.left.clone();
+                node_right_ref.parent = node_ref.parent.clone();
+                node_right_ref.left = self.clone();
+                
             }
-            node.borrow_mut().parent = node_right.clone();
+            node_ref.parent = node_right.clone();
             if let Some(parent_ref) = &node_parent.0 {
                 let mut parent = parent_ref.borrow_mut();
                 if parent.key < node_ref.key {
@@ -63,9 +66,14 @@ impl RedBlackTreeOps for RedBlackTree {
                     parent.left = node_right.clone();
                 }
             }
+            return node_right.clone()
+            
+            
         }
+        self.clone()
+        
     }
-    fn right_rotate(&mut self) {
+    fn right_rotate(&mut self) -> RedBlackTree{
         // assuming it is right
         if let Some(node) = &self.0 {
             let node_ref = node.borrow_mut();
@@ -87,7 +95,10 @@ impl RedBlackTreeOps for RedBlackTree {
                     parent.left = node_left.clone();
                 }
             }
+            return node_left.clone()
+
         }
+        self.clone()
     }
     fn fix_tree(&mut self) {
         if let Some(node_ref) = &self.0 {
@@ -103,7 +114,7 @@ impl RedBlackTreeOps for RedBlackTree {
                             grandparent.left.clone()
                         };
                         match uncle.0 {
-                            Some(uncle_node) if uncle_node.borrow().color == NodeColor::Red => {
+                            Some(uncle_node) if uncle_node.borrow_mut().color == NodeColor::Red => {
                                 parent_node.borrow_mut().color = NodeColor::Black;
                                 uncle_node.borrow_mut().color = NodeColor::Black;
                                 grandparent.color = NodeColor::Red;
@@ -182,7 +193,7 @@ impl TreeTrait for RedBlackTree {
             self.0 = Some(Rc::new(RefCell::new(RedBlackTreeNode {
                 color: NodeColor::Red,
                 key,
-                parent: RedBlackTree(None),
+                parent: self.clone(),
                 left: RedBlackTree(None),
                 right: RedBlackTree(None),
             })));
@@ -192,11 +203,13 @@ impl TreeTrait for RedBlackTree {
     }
 
     fn delete_node(&mut self, key: u32) {
-        todo!()
+        *self = self.left_rotate();
     }
 
     fn count_leaves(&self) -> u32 {
-        todo!()
+
+        print_tree(self).expect("Error printing tree");
+        1
     }
 
     fn height(&self) -> u32 {
