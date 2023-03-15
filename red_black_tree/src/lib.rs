@@ -1,7 +1,9 @@
 extern crate tree;
 use tree::TreeTrait;
-
+use ptree::*;
+use std::borrow::Cow;
 use std::cell::RefCell;
+use std::io;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -11,6 +13,7 @@ pub enum NodeColor {
 }
 
 type Tree = Rc<RefCell<RedBlackTreeNode>>;
+
 
 pub struct RedBlackTree(pub Option<Tree>);
 
@@ -25,7 +28,18 @@ trait RedBlackTreeOps {
     fn left_rotate(&mut self);
     fn right_rotate(&mut self);
     fn fix_tree(&mut self);
-    fn clone(&self) -> Self;
+    //fn clone(&self) -> Self;
+}
+
+impl Clone for RedBlackTree {
+    fn clone(&self) -> Self {
+        if let Some(node) = &self.0 {
+            let new_node = RedBlackTree(Some(Rc::clone(node)));
+            new_node
+        } else {
+            RedBlackTree(None)
+        }
+    }
 }
 
 impl RedBlackTreeOps for RedBlackTree {
@@ -77,14 +91,6 @@ impl RedBlackTreeOps for RedBlackTree {
             }
         }
     }
-    fn clone(&self) -> Self {
-        if let Some(node) = &self.0 {
-            let new_node = RedBlackTree(Some(Rc::clone(node)));
-            new_node
-        } else {
-            RedBlackTree(None)
-        }
-    }
     fn fix_tree(&mut self) {
         if let Some(node) = &self.0 {
             let mut node = node.borrow_mut();
@@ -102,6 +108,35 @@ impl RedBlackTreeOps for RedBlackTree {
         }
     }
 }
+
+
+impl TreeItem for RedBlackTree {
+    type Child = Self;
+    fn write_self<W: io::Write>(&self, f: &mut W, style: &Style) -> io::Result<()> {
+        if let Some(node) = &self.0 {
+            let node = node.borrow_mut();
+            match node.color {
+                NodeColor::Black => {
+                    write!(f, "{}", style.paint(node.key.to_string() + "(B)"));
+                }
+                NodeColor::Red => {
+                    write!(f, "{}", style.paint(node.key.to_string()+ "(R)"));
+                }        
+            }
+        }
+        Ok(())
+    }
+    fn children(&self) -> Cow<[Self::Child]> {
+        let mut childs = Vec::new();
+        if let Some(node) = &self.0 {
+            let node = node.borrow_mut();
+            childs.push(node.left.clone());
+            childs.push(node.right.clone());
+        }
+        Cow::from(childs)
+    }
+}
+
 
 impl TreeTrait for RedBlackTree {
     fn insert_node(&mut self, key: u32) {
@@ -122,7 +157,7 @@ impl TreeTrait for RedBlackTree {
                 right: RedBlackTree(None),
             })));
 
-            self.fix_tree();
+            //self.fix_tree();
         }
     }
 
@@ -147,6 +182,6 @@ impl TreeTrait for RedBlackTree {
     }
 
     fn print_tree(&self) {
-        todo!()
+        print_tree(self);
     }
 }

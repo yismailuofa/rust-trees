@@ -1,5 +1,5 @@
 use red_black_tree::RedBlackTree;
-use tree::prompt_user;
+use tree::{prompt_user, TreeTrait};
 
 /**
 Your library
@@ -16,7 +16,12 @@ sufficient)
 
 fn main() {
     let mut tree = RedBlackTree(None);
-
+    tree.insert_node(10);
+    tree.insert_node(0);
+    tree.insert_node(20);
+    tree.insert_node(50);
+    tree.insert_node(30);
+    tree.insert_node(40);
     loop {
         prompt_user(&mut tree);
     }
