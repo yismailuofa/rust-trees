@@ -32,9 +32,9 @@ impl RedBlackTreeOps for RedBlackTree {
     fn left_rotate(&mut self) {
         // assuming it is left
         if let Some(node) = &self.0 {
-            let mut node_ref = node.borrow_mut();
-            let mut node_parent = &node_ref.parent;
-            let mut node_right = &node_ref.right;
+            let node_ref = node.borrow_mut();
+            let node_parent = &node_ref.parent;
+            let node_right = &node_ref.right;
 
             if let Some(node_right_ref) = &node_right.0 {
                 let mut node_right = node_right_ref.borrow_mut();
@@ -56,9 +56,9 @@ impl RedBlackTreeOps for RedBlackTree {
     fn right_rotate(&mut self) {
         // assuming it is right
         if let Some(node) = &self.0 {
-            let mut node_ref = node.borrow_mut();
-            let mut node_parent = &node_ref.parent;
-            let mut node_left = &node_ref.left;
+            let node_ref = node.borrow_mut();
+            let node_parent = &node_ref.parent;
+            let node_left = &node_ref.left;
 
             if let Some(node_left_ref) = &node_left.0 {
                 let mut node_left = node_left_ref.borrow_mut();
