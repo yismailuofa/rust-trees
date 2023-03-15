@@ -41,7 +41,6 @@ impl RedBlackTreeOps for RedBlackTree {
                 node.borrow_mut().right = node_right.left.clone();
                 node_right.parent = node_ref.parent.clone();
                 node_right.left = self.clone();
-
             }
             node.borrow_mut().parent = node_right.clone();
             if let Some(parent_ref) = &node_parent.0 {
@@ -53,7 +52,6 @@ impl RedBlackTreeOps for RedBlackTree {
                 }
             }
         }
-
     }
     fn right_rotate(&mut self) {
         // assuming it is right
@@ -67,7 +65,6 @@ impl RedBlackTreeOps for RedBlackTree {
                 node.borrow_mut().left = node_left.right.clone();
                 node_left.parent = node_ref.parent.clone();
                 node_left.right = self.clone();
-
             }
             node.borrow_mut().parent = node_left.clone();
             if let Some(parent_ref) = &node_parent.0 {
@@ -79,10 +76,6 @@ impl RedBlackTreeOps for RedBlackTree {
                 }
             }
         }
-
-    }
-    fn fix_tree(&mut self) {
-        todo!()
     }
     fn clone(&self) -> Self {
         if let Some(node) = &self.0 {
@@ -90,6 +83,22 @@ impl RedBlackTreeOps for RedBlackTree {
             new_node
         } else {
             RedBlackTree(None)
+        }
+    }
+    fn fix_tree(&mut self) {
+        if let Some(node) = &self.0 {
+            let mut node = node.borrow_mut();
+
+            if node.parent.0.is_none() {
+                node.color = NodeColor::Black;
+            } else {
+                node.color = NodeColor::Red;
+
+                if let Some(parent) = &node.parent.0 {
+                    let parent = parent.borrow();
+                    todo!()
+                }
+            }
         }
     }
 }

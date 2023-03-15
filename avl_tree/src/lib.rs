@@ -12,7 +12,7 @@ pub struct AVLTreeNode {
     pub key: u32,
     pub parent: AVLTree,
     pub left: AVLTree,  // Maybe make these private later
-    pub right: AVLTree, // Maybe make these private late
+    pub right: AVLTree, // Maybe make these private later
     pub height: u32,
     pub balance_factor: i32,
 }
