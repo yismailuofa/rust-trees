@@ -105,47 +105,51 @@ impl RedBlackTreeOps for RedBlackTree {
             let mut node = node_ref.borrow_mut();
             if let Some(parent_node) = &node.parent.0 {
                 let parent = parent_node.borrow_mut();
+
                 if parent.color == NodeColor::Red {
-                    if let Some(grandparent) = &parent.parent.0 {
-                        let mut grandparent = grandparent.borrow_mut();
+                    if let Some(grandparent_node) = &parent.parent.0 {
+                        let grandparent = grandparent_node.borrow();
+
                         let uncle = if parent.key < grandparent.key {
                             grandparent.right.clone()
                         } else {
                             grandparent.left.clone()
                         };
+
                         match uncle.0 {
                             Some(uncle_node) if uncle_node.borrow_mut().color == NodeColor::Red => {
                                 parent_node.borrow_mut().color = NodeColor::Black;
                                 uncle_node.borrow_mut().color = NodeColor::Black;
-                                grandparent.color = NodeColor::Red;
+                                grandparent_node.borrow_mut().color = NodeColor::Red;
                                 parent.parent.clone().fix_tree();
                             }
                             _ => {
                                 if node.key < parent.key && parent.key < grandparent.key {
                                     parent.parent.clone().right_rotate();
                                     parent_node.borrow_mut().color = NodeColor::Black;
-                                    grandparent.color = NodeColor::Red;
+                                    grandparent_node.borrow_mut().color = NodeColor::Red;
                                 } else if node.key > parent.key && parent.key > grandparent.key {
                                     parent.parent.clone().left_rotate();
                                     parent_node.borrow_mut().color = NodeColor::Black;
-                                    grandparent.color = NodeColor::Red;
+                                    grandparent_node.borrow_mut().color = NodeColor::Red;
                                 } else if node.key > parent.key && parent.key < grandparent.key {
                                     node.parent.clone().left_rotate();
                                     parent.parent.clone().right_rotate();
                                     node_ref.borrow_mut().color = NodeColor::Black;
-                                    grandparent.color = NodeColor::Red;
+                                    grandparent_node.borrow_mut().color = NodeColor::Red;
                                 } else {
                                     node.parent.clone().right_rotate();
                                     parent.parent.clone().left_rotate();
                                     node_ref.borrow_mut().color = NodeColor::Black;
-                                    grandparent.color = NodeColor::Red;
+                                    grandparent_node.borrow_mut().color = NodeColor::Red;
                                 }
                             }
                         }
                     }
                 }
+            } else {
+                node.color = NodeColor::Black;
             }
-            node.color = NodeColor::Black;
         }
     }
 }
