@@ -180,6 +180,7 @@ impl TreeItem for RedBlackTree {
 
 impl TreeTrait for RedBlackTree {
     fn insert_node(&mut self,parent: Option<&RedBlackTree>, key: u32) {
+        
         if let Some(node) = &self.0 {
             let mut node = node.borrow_mut();
 
@@ -189,14 +190,24 @@ impl TreeTrait for RedBlackTree {
                 node.right.insert_node(Some(self),key);
             }
         } else {
-            self.0 = Some(Rc::new(RefCell::new(RedBlackTreeNode {
-                color: NodeColor::Red,
-                key,
-                parent: parent.unwrap().clone(),
-                left: RedBlackTree(None),
-                right: RedBlackTree(None),
-            })));
-
+            if parent.is_none() {
+                self.0 = Some(Rc::new(RefCell::new(RedBlackTreeNode {
+                    color: NodeColor::Black,
+                    key,
+                    parent: RedBlackTree(None),
+                    left: RedBlackTree(None),
+                    right: RedBlackTree(None),
+                })));
+            }
+            else{
+                self.0 = Some(Rc::new(RefCell::new(RedBlackTreeNode {
+                    color: NodeColor::Red,
+                    key,
+                    parent: parent.unwrap().clone(),
+                    left: RedBlackTree(None),
+                    right: RedBlackTree(None),
+                })));
+            }   
             self.fix_tree();
         }
     }
