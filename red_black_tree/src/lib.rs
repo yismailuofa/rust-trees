@@ -1,10 +1,10 @@
 extern crate tree;
-use tree::TreeTrait;
 use ptree::*;
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::io;
 use std::rc::Rc;
+use tree::TreeTrait;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum NodeColor {
@@ -13,7 +13,6 @@ pub enum NodeColor {
 }
 
 type Tree = Rc<RefCell<RedBlackTreeNode>>;
-
 
 pub struct RedBlackTree(pub Option<Tree>);
 
@@ -109,7 +108,6 @@ impl RedBlackTreeOps for RedBlackTree {
     }
 }
 
-
 impl TreeItem for RedBlackTree {
     type Child = Self;
     fn write_self<W: io::Write>(&self, f: &mut W, style: &Style) -> io::Result<()> {
@@ -117,11 +115,13 @@ impl TreeItem for RedBlackTree {
             let node = node.borrow_mut();
             match node.color {
                 NodeColor::Black => {
-                    write!(f, "{}", style.paint(node.key.to_string() + "(B)"));
+                    write!(f, "{}", style.paint(node.key.to_string() + "(B)"))
+                        .expect("Error printing tree");
                 }
                 NodeColor::Red => {
-                    write!(f, "{}", style.paint(node.key.to_string()+ "(R)"));
-                }        
+                    write!(f, "{}", style.paint(node.key.to_string() + "(R)"))
+                        .expect("Error printing tree");
+                }
             }
         }
         Ok(())
@@ -136,7 +136,6 @@ impl TreeItem for RedBlackTree {
         Cow::from(childs)
     }
 }
-
 
 impl TreeTrait for RedBlackTree {
     fn insert_node(&mut self, key: u32) {
@@ -182,6 +181,6 @@ impl TreeTrait for RedBlackTree {
     }
 
     fn print_tree(&self) {
-        print_tree(self);
+        print_tree(self).expect("Error printing tree")
     }
 }
