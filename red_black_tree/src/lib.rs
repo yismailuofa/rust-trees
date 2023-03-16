@@ -1,6 +1,6 @@
 extern crate tree;
 use ptree::*;
-use std::borrow::{Borrow, Cow};
+use std::borrow::Cow;
 use std::cell::RefCell;
 use std::io;
 use std::rc::Rc;
@@ -142,6 +142,7 @@ impl RedBlackTreeOps for RedBlackTree {
                     }
                 }
             } else {
+                println!("{:?}", &node.parent);
                 node.color = NodeColor::Black;
             }
         }
@@ -179,28 +180,42 @@ impl TreeItem for RedBlackTree {
 
 impl TreeTrait for RedBlackTree {
     fn insert_node(&mut self, key: u32) {
-        if let Some(node) = &self.0 {
-            let mut node = node.borrow_mut();
+        let mut parent = self.clone();
+        let mut node = self.clone();
 
-            if key < node.key {
-                node.left.insert_node(key);
-            } else if key > node.key {
-                node.right.insert_node(key);
+        while let Some(node_ref) = &node.0.clone() {
+            let node_ref = node_ref.borrow_mut();
+
+            if key < node_ref.key {
+                parent = node_ref.left.clone();
+                node = node_ref.left.clone();
+            } else {
+                parent = node_ref.right.clone();
+                node = node_ref.right.clone();
             }
-        } else {
-            self.0 = Some(Rc::new(RefCell::new(RedBlackTreeNode {
-                color: NodeColor::Red,
-                key,
-                parent: self.clone(),
-                left: RedBlackTree(None),
-                right: RedBlackTree(None),
-            })));
+        }
 
-            self.fix_tree();
+        let mut new_node = RedBlackTree(Some(Rc::new(RefCell::new(RedBlackTreeNode {
+            key,
+            color: NodeColor::Red,
+            parent: parent.clone(),
+            left: RedBlackTree(None),
+            right: RedBlackTree(None),
+        }))));
+
+        if let Some(parent_ref) = &parent.0 {
+            let mut parent = parent_ref.borrow_mut();
+
+            if key < parent.key {
+                parent.left = new_node.clone();
+            } else {
+                parent.right = new_node.clone();
+            }
+            new_node.fix_tree();
         }
     }
 
-    fn delete_node(&mut self, key: u32) {
+    fn delete_node(&mut self, _: u32) {
         *self = self.left_rotate();
     }
 

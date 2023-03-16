@@ -18,11 +18,11 @@ pub struct AVLTreeNode {
 }
 
 impl TreeTrait for AVLTree {
-    fn insert_node(&mut self, key: u32) {
+    fn insert_node(&mut self, _: u32) {
         todo!()
     }
 
-    fn delete_node(&mut self, key: u32) {
+    fn delete_node(&mut self, _: u32) {
         todo!()
     }
 
@@ -31,12 +31,11 @@ impl TreeTrait for AVLTree {
             Some(tree) => {
                 if tree.borrow().left.is_empty() && tree.borrow().right.is_empty() {
                     return 1;
-                }
-                else {
+                } else {
                     return tree.borrow().left.count_leaves() + tree.borrow().right.count_leaves();
                 }
-            }, 
-            None => 0
+            }
+            None => 0,
         }
     }
 
@@ -51,13 +50,11 @@ impl TreeTrait for AVLTree {
     }
 
     fn in_order(&self) -> Vec<u32> {
-
         // initialize empty vector
         let mut vec: Vec<u32> = Vec::new();
 
         match &self.0 {
             Some(tree) => {
-                
                 // add left subtree
                 vec.append(&mut tree.borrow().left.in_order());
 
@@ -68,12 +65,11 @@ impl TreeTrait for AVLTree {
                 vec.append(&mut tree.borrow().right.in_order());
 
                 return vec;
-            },
+            }
             None => {
                 return vec;
             }
         };
-
     }
 
     fn is_empty(&self) -> bool {
