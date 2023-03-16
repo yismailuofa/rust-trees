@@ -41,11 +41,13 @@ impl TreeTrait for RBNode {
             return;
         }
 
+        let mut curr = self.clone();
+
         while let RBNode::Node {
             key, left, right, ..
-        } = self.clone()
+        } = &curr.clone()
         {
-            if _key < key {
+            if _key < *key {
                 let mut left_node = left.borrow_mut();
 
                 if let RBNode::Empty = left_node.clone() {
@@ -54,13 +56,13 @@ impl TreeTrait for RBNode {
                         color: Color::Red,
                         left: Rc::new(RefCell::new(RBNode::Empty)),
                         right: Rc::new(RefCell::new(RBNode::Empty)),
-                        parent: Rc::downgrade(&Rc::new(RefCell::new(self.clone()))),
+                        parent: Rc::downgrade(&Rc::new(RefCell::new(curr.clone()))),
                     };
                     return;
                 } else {
-                    *self = left_node.clone();
+                    curr = left_node.clone();
                 }
-            } else if _key > key {
+            } else if _key > *key {
                 let mut right_node = right.borrow_mut();
 
                 if let RBNode::Empty = right_node.clone() {
@@ -69,14 +71,12 @@ impl TreeTrait for RBNode {
                         color: Color::Red,
                         left: Rc::new(RefCell::new(RBNode::Empty)),
                         right: Rc::new(RefCell::new(RBNode::Empty)),
-                        parent: Rc::downgrade(&Rc::new(RefCell::new(self.clone()))),
+                        parent: Rc::downgrade(&Rc::new(RefCell::new(curr.clone()))),
                     };
                     return;
                 } else {
-                    *self = right_node.clone();
+                    curr = right_node.clone();
                 }
-            } else {
-                return;
             }
         }
     }

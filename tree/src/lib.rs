@@ -39,7 +39,9 @@ pub fn prompt_user(tree: &mut impl TreeTrait) {
             let mut input = String::new();
             std::io::stdin().read_line(&mut input).unwrap();
             let value = input.trim().parse::<u32>().unwrap();
+
             tree.insert_node(value);
+
             println!("Value inserted successfully");
         }
         "2" => {
