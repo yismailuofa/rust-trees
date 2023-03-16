@@ -13,62 +13,70 @@ pub enum Color {
     Black,
 }
 
+pub type Tree = Rc<RefCell<RBNode>>;
+pub type WeakTree = Weak<RefCell<RBNode>>;
+
 #[derive(Clone, Debug)]
 pub enum RBNode {
     Node {
         key: u32,
         color: Color,
-        left: Rc<RefCell<RBNode>>,
-        right: Rc<RefCell<RBNode>>,
-        parent: Weak<RefCell<RBNode>>,
+        left: Tree,
+        right: Tree,
+        parent: WeakTree,
     },
     Empty,
 }
 
 impl TreeTrait for RBNode {
     fn insert_node(&mut self, _key: u32) {
-        let parent = Rc::new(RefCell::new(RBNode::Empty));
-
-        if let RBNode::Empty = self.clone() {
+        if let RBNode::Empty = self {
             *self = RBNode::Node {
                 key: _key,
-                color: Color::Red,
+                color: Color::Black,
                 left: Rc::new(RefCell::new(RBNode::Empty)),
                 right: Rc::new(RefCell::new(RBNode::Empty)),
-                parent: Rc::downgrade(&parent),
+                parent: Weak::new(),
             };
             return;
         }
 
         while let RBNode::Node {
             key, left, right, ..
-        } = self
+        } = self.clone()
         {
-            if _key > key {
-                if let RBNode::Empty = right.borrow().clone() {
-                    right.replace(RBNode::Node {
+            if _key < key {
+                let mut left_node = left.borrow_mut();
+
+                if let RBNode::Empty = left_node.clone() {
+                    *left_node = RBNode::Node {
                         key: _key,
                         color: Color::Red,
                         left: Rc::new(RefCell::new(RBNode::Empty)),
                         right: Rc::new(RefCell::new(RBNode::Empty)),
-                        parent: Rc::downgrade(&parent),
-                    });
+                        parent: Rc::downgrade(&Rc::new(RefCell::new(self.clone()))),
+                    };
+                    return;
                 } else {
-                    *self = right.borrow().clone();
+                    *self = left_node.clone();
+                }
+            } else if _key > key {
+                let mut right_node = right.borrow_mut();
+
+                if let RBNode::Empty = right_node.clone() {
+                    *right_node = RBNode::Node {
+                        key: _key,
+                        color: Color::Red,
+                        left: Rc::new(RefCell::new(RBNode::Empty)),
+                        right: Rc::new(RefCell::new(RBNode::Empty)),
+                        parent: Rc::downgrade(&Rc::new(RefCell::new(self.clone()))),
+                    };
+                    return;
+                } else {
+                    *self = right_node.clone();
                 }
             } else {
-                if let RBNode::Empty = left.borrow().clone() {
-                    left.replace(RBNode::Node {
-                        key: _key,
-                        color: Color::Red,
-                        left: Rc::new(RefCell::new(RBNode::Empty)),
-                        right: Rc::new(RefCell::new(RBNode::Empty)),
-                        parent: Rc::downgrade(&parent),
-                    });
-                    break;
-                } else {
-                    *self = left.borrow().clone();
-                }
+                return;
             }
         }
     }
