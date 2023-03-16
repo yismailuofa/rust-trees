@@ -82,4 +82,8 @@ impl TreeTrait for AVLTree {
     fn print_tree(&self) {
         todo!()
     }
+
+    fn new() -> Self {
+        todo!()
+    }
 }

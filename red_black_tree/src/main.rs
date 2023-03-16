@@ -1,18 +1,16 @@
-use red_black_tree::{RedBlackTree, RedBlackTreeOps};
+use red_black_tree::RBNode;
 use tree::{prompt_user, TreeTrait};
 
 fn main() {
-    let mut tree = RedBlackTree(None);
-    tree.insert_node(None, 1);
-    // tree.fix_tree();
-    tree.insert_node(None, 2);
-    // tree.fix_tree();
-    tree.insert_node(None, 3);
-    // tree.fix_tree();
-    tree.insert_node(None, 4);
-    tree.fix_tree();
-
     loop {
+        // Create a tree with 3 values
+        let mut tree = RBNode::new();
+        tree.insert_node(10);
+        tree.insert_node(20);
+        // tree.insert_node(30);
+
+        println!("Tree: {:?}", tree);
+
         prompt_user(&mut tree);
     }
 }
