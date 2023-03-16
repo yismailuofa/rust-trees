@@ -27,3 +27,13 @@ pub enum RBNode {
     },
     Empty,
 }
+
+impl PartialEq for RBNode {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (RBNode::Node { key, .. }, RBNode::Node { key: other_key, .. }) => key == other_key,
+            (RBNode::Empty, RBNode::Empty) => true,
+            _ => false,
+        }
+    }
+}
