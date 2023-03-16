@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{BenchmarkId, black_box, criterion_group, criterion_main, Criterion};
 use red_black_tree::*;
 
 fn test_tree(tree_size: i32) {
@@ -14,13 +14,17 @@ fn test_tree(tree_size: i32) {
     }
 }
 
-fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("RB 10k", |b| b.iter(|| test_tree(black_box(10000))));
-    c.bench_function("RB 40k", |b| b.iter(|| test_tree(black_box(40000))));
-    c.bench_function("RB 70k", |b| b.iter(|| test_tree(black_box(70000))));
-    c.bench_function("RB 100k", |b| b.iter(|| test_tree(black_box(100000))));
-    c.bench_function("RB 130k", |b| b.iter(|| test_tree(black_box(130000))));
+fn from_elem(c: &mut Criterion) {
+
+    let mut group = c.benchmark_group("RedBlack_Tree");
+
+    for size in [10000, 40000, 70000, 100000, 130000].iter() {
+        group.bench_with_input(BenchmarkId::from_parameter(size), size, |b, &size| {
+            b.iter(|| test_tree(black_box(size)));
+        });
+    }
+    group.finish();
 }
 
-criterion_group!(benches, criterion_benchmark);
+criterion_group!(benches, from_elem);
 criterion_main!(benches);
