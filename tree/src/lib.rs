@@ -1,12 +1,18 @@
 pub trait TreeTrait {
-    fn insert_node(&mut self, parent: Option<&Self>, key: u32);
+    fn insert_node(&mut self, key: u32);
     fn delete_node(&mut self, key: u32);
     fn count_leaves(&self) -> u32;
     fn height(&self) -> u32;
     fn in_order(&self) -> Vec<u32>;
     fn is_empty(&self) -> bool;
     fn print_tree(&self);
-    //fn clone(&self) -> Self;
+    fn new() -> Self;
+}
+
+pub trait TreeOpsTrait {
+    fn rotate_left(&mut self);
+    fn rotate_right(&mut self);
+    fn fix_violation(&mut self);
 }
 
 pub fn prompt_user(tree: &mut impl TreeTrait) {
@@ -33,7 +39,7 @@ pub fn prompt_user(tree: &mut impl TreeTrait) {
             let mut input = String::new();
             std::io::stdin().read_line(&mut input).unwrap();
             let value = input.trim().parse::<u32>().unwrap();
-            tree.insert_node(None, value);
+            tree.insert_node(value);
             println!("Value inserted successfully");
         }
         "2" => {
