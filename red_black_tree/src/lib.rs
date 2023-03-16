@@ -27,7 +27,6 @@ trait RedBlackTreeOps {
     fn left_rotate(&mut self);
     fn right_rotate(&mut self);
     fn fix_tree(&mut self);
-    //fn clone(&self) -> Self;
 }
 
 impl Clone for RedBlackTree {
@@ -124,7 +123,7 @@ impl RedBlackTreeOps for RedBlackTree {
                                 } else if node.key > parent.key && parent.key < grandparent.key {
                                     node.parent.clone().left_rotate();
                                     parent.parent.clone().right_rotate();
-                                    node_ref.borrow_mut().color = NodeColor::Black;
+                                    node_ref.clone().borrow_mut().color = NodeColor::Black;
                                     grandparent_node.borrow_mut().color = NodeColor::Red;
                                 } else {
                                     node.parent.clone().right_rotate();
@@ -196,7 +195,7 @@ impl TreeTrait for RedBlackTree {
     }
 
     fn delete_node(&mut self, key: u32) {
-        todo!()
+        self.left_rotate()
     }
 
     fn count_leaves(&self) -> u32 {
