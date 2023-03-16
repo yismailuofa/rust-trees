@@ -3,7 +3,7 @@ use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criteri
 use tree::TreeTrait;
 
 fn test_tree(tree_size: i32) {
-    let mut tree = AVLTree(None);
+    let mut tree = AVLNode::new();
 
     for i in 0..tree_size {
         tree.insert_node(i as u32);
