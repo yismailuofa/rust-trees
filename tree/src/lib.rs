@@ -1,5 +1,5 @@
 pub trait TreeTrait {
-    fn insert_node(&mut self,parent: Option<&Self>, key: u32);
+    fn insert_node(&mut self, parent: Option<&Self>, key: u32);
     fn delete_node(&mut self, key: u32);
     fn count_leaves(&self) -> u32;
     fn height(&self) -> u32;

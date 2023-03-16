@@ -25,7 +25,7 @@ pub struct RedBlackTreeNode {
     pub left: RedBlackTree,  // Maybe make these private later
     pub right: RedBlackTree, // Maybe make these private later
 }
-trait RedBlackTreeOps {
+pub trait RedBlackTreeOps {
     fn left_rotate(&mut self) -> RedBlackTree;
     fn right_rotate(&mut self) -> RedBlackTree;
     fn fix_tree(&mut self);
@@ -43,6 +43,7 @@ impl Clone for RedBlackTree {
 
 impl RedBlackTreeOps for RedBlackTree {
     fn left_rotate(&mut self) -> RedBlackTree {
+        println!("left_rotate!");
         // assuming it is left
         if let Some(node) = &self.0 {
             let mut node_ref = node.borrow_mut();
@@ -94,9 +95,11 @@ impl RedBlackTreeOps for RedBlackTree {
         }
         self.clone()
     }
+
     fn fix_tree(&mut self) {
         if let Some(node_ref) = &self.0 {
             let mut node = node_ref.borrow_mut();
+
             if let Some(parent_node) = &node.parent.0 {
                 let parent = parent_node.borrow_mut();
 
@@ -142,7 +145,6 @@ impl RedBlackTreeOps for RedBlackTree {
                     }
                 }
             } else {
-                println!("{:?}", &node.parent);
                 node.color = NodeColor::Black;
             }
         }
@@ -179,15 +181,14 @@ impl TreeItem for RedBlackTree {
 }
 
 impl TreeTrait for RedBlackTree {
-    fn insert_node(&mut self,parent: Option<&RedBlackTree>, key: u32) {
-        
+    fn insert_node(&mut self, parent: Option<&RedBlackTree>, key: u32) {
         if let Some(node) = &self.0 {
             let mut node = node.borrow_mut();
 
             if key < node.key {
                 node.left.insert_node(Some(self), key);
             } else if key > node.key {
-                node.right.insert_node(Some(self),key);
+                node.right.insert_node(Some(self), key);
             }
         } else {
             if parent.is_none() {
@@ -198,8 +199,7 @@ impl TreeTrait for RedBlackTree {
                     left: RedBlackTree(None),
                     right: RedBlackTree(None),
                 })));
-            }
-            else{
+            } else {
                 self.0 = Some(Rc::new(RefCell::new(RedBlackTreeNode {
                     color: NodeColor::Red,
                     key,
@@ -207,8 +207,7 @@ impl TreeTrait for RedBlackTree {
                     left: RedBlackTree(None),
                     right: RedBlackTree(None),
                 })));
-            }   
-            self.fix_tree();
+            }
         }
     }
 
