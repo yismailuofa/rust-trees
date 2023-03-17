@@ -7,20 +7,30 @@ use std::{
     rc::{Rc, Weak},
 };
 
+use tree::TreeTrait;
+
 pub struct RBTree {
     root: Tree,
 }
 
 impl Default for RBTree {
     fn default() -> Self {
-        RBTree {
+        let mut tree = RBTree {
             root: Rc::new(RefCell::new(RBNode::Empty)),
-        }
+        };
+
+        tree.insert_node(10);
+        tree.insert_node(20);
+        tree.insert_node(30);
+
+        tree_ops_trait::rotate_left(&tree.root, &mut tree.root.clone());
+
+        tree
     }
 }
 
 #[derive(PartialEq, Clone, Debug, Copy)]
-enum Color {
+pub enum Color {
     Red,
     Black,
 }
@@ -28,7 +38,7 @@ type Tree = Rc<RefCell<RBNode>>;
 type WeakTree = Weak<RefCell<RBNode>>;
 
 #[derive(Clone, Debug)]
-enum RBNode {
+pub enum RBNode {
     Node {
         key: u32,
         color: Color,
