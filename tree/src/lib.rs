@@ -6,7 +6,6 @@ pub trait TreeTrait {
     fn in_order(&self) -> Vec<u32>;
     fn is_empty(&self) -> bool;
     fn print_tree(&self);
-    fn new() -> Self;
 }
 
 pub trait TreeOpsTrait {

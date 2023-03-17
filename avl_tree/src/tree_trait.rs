@@ -3,11 +3,11 @@ use tree::TreeTrait;
 use crate::AVLNode;
 
 impl TreeTrait for AVLNode {
-    fn insert_node(&mut self, key: u32) {
+    fn insert_node(&mut self, _key: u32) {
         todo!()
     }
 
-    fn delete_node(&mut self, key: u32) {
+    fn delete_node(&mut self, _key: u32) {
         todo!()
     }
 

@@ -3,7 +3,7 @@ use red_black_tree::*;
 use tree::TreeTrait;
 
 fn test_tree(tree_size: i32) {
-    let mut tree = RBNode::new();
+    let mut tree = RBTree::default();
 
     for i in 0..tree_size {
         tree.insert_node(i as u32);

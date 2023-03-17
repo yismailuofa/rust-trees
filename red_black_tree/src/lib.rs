@@ -7,17 +7,29 @@ use std::{
     rc::{Rc, Weak},
 };
 
-#[derive(PartialEq, Clone, Debug)]
-pub enum Color {
+pub struct RBTree {
+    root: Tree,
+}
+
+impl Default for RBTree {
+    fn default() -> Self {
+        RBTree {
+            root: Rc::new(RefCell::new(RBNode::Empty)),
+        }
+    }
+}
+
+#[derive(PartialEq, Clone, Debug, Copy)]
+enum Color {
     Red,
     Black,
 }
 
-pub type Tree = Rc<RefCell<RBNode>>;
-pub type WeakTree = Weak<RefCell<RBNode>>;
+type Tree = Rc<RefCell<RBNode>>;
+type WeakTree = Weak<RefCell<RBNode>>;
 
 #[derive(Clone, Debug)]
-pub enum RBNode {
+enum RBNode {
     Node {
         key: u32,
         color: Color,
