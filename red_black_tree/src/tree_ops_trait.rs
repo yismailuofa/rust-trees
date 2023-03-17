@@ -1,35 +1,36 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{print, RBNode, Tree};
+use crate::{RBNode, Tree};
 
-pub fn rotate_left(x: &Tree) -> Option<Tree> {
-    // Rotates left
-    // Ex:
-    //       y                               x
-    //      / \                             /  \
-    //     x   T3                          T1   y
-    //    / \       < - - - - - - -            / \
-    //   T1  T2     Left Rotation            T2  T3
+/**
+Rotates left
+   Ex:
+         y                               x
+        / \                             /  \
+       x   T3                          T1   y
+      / \       < - - - - - - -            / \
+     T1  T2     Left Rotation            T2  T3
 
-    // # Rotation
-    // parent = x.parent
-    // y = x.right
-    // T2 = y.left
+   # Rotation
+   parent = x.parent
+   y = x.right
+   T2 = y.left
 
-    // y.left = x
-    // x.right = T2
+   y.left = x
+   x.right = T2
 
-    // if T2:
-    //     T2.parent = x
-    // y.parent = parent
+   if T2:
+       T2.parent = x
+   y.parent = parent
 
-    // if parent is None:
-    //     self.root = y
-    // elif parent.left == x:
-    //     parent.left = y
-    // elif y.parent.right == x:
-    //     parent.right = y
-
+   if parent is None:
+       self.root = y
+   elif parent.left == x:
+       parent.left = y
+   elif y.parent.right == x:
+       parent.right = y
+*/
+pub fn rotate_left(x: &Tree, root: &mut Tree) {
     match &mut *x.borrow_mut() {
         RBNode::Node { right, parent, .. } => {
             let old_parent = match parent.upgrade() {
@@ -89,39 +90,65 @@ pub fn rotate_left(x: &Tree) -> Option<Tree> {
                         };
                     }
                 }
-                _ => return Some(y), // this is the case where the old rotation point was the root, this is wht indicates to update root
+                _ => *root = y.clone(),
             };
         }
         _ => (),
-        
     }
-    
-    None
-    // im sying
 }
 
-pub fn rotate_right(x: &Tree) -> Option<Tree> {
+/**
+Rotates right
+Ex:
+
+        y                               x
+        / \     Right Rotation          /  \
+        x   T3   - - - - - - - >        T1   y
+    / \                                  / \
+    T1  T2                              T2  T3
+# Rotation
+parent = y.parent
+
+x = y.left
+T2 = x.right
+
+x.right = y
+y.left = T2
+
+if T2:
+    T2.parent = y
+x.parent = parent
+
+
+if parent is None:
+    self.root = x
+if parent.left == y:
+    parent.left = x
+elif y.parent.right == y:
+    parent.right = x
+*/
+pub fn rotate_right(x: &Tree, root: &mut Tree) {
     match &mut *x.borrow_mut() {
         RBNode::Node { left, parent, .. } => {
             let old_parent = match parent.upgrade() {
                 Some(_) => parent.upgrade().unwrap(),
                 None => Rc::new(RefCell::new(RBNode::Empty)),
             }; // parent = x.parent
-            let y = left.clone(); // y = x.right
+            let y = left.clone(); // y = x.left
 
-            // T2 = y.left
+            // T2 = y.right
             let t2 = match &*y.borrow_mut() {
                 RBNode::Node { right, .. } => right.clone(),
                 RBNode::Empty => Rc::new(RefCell::new(RBNode::Empty)),
             };
 
-            // y.left = x
+            // y.right = x
             match &mut *y.borrow_mut() {
                 RBNode::Node { right, .. } => *right = x.clone(),
                 _ => (),
             };
 
-            //x.right = t2
+            //x.left = t2
             *left = t2.clone();
 
             // if t2:
@@ -160,14 +187,11 @@ pub fn rotate_right(x: &Tree) -> Option<Tree> {
                         };
                     }
                 }
-                _ => return Some(y), // this is the case where the old rotation point was the root, this is wht indicates to update root
+                _ => *root = y.clone(),
             };
         }
         _ => (),
-        
     }
-    
-    None
 }
 
 fn fix_violation(x: Tree) {

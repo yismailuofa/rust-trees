@@ -8,6 +8,7 @@ use std::{
 };
 
 use tree::TreeTrait;
+use tree_ops_trait::rotate_left;
 
 pub struct RBTree {
     root: Tree,
@@ -19,14 +20,11 @@ impl Default for RBTree {
             root: Rc::new(RefCell::new(RBNode::Empty)),
         };
 
-        tree.insert_node(30);
-        tree.insert_node(20);
         tree.insert_node(10);
+        tree.insert_node(20);
+        tree.insert_node(30);
 
-        match tree_ops_trait::rotate_right(&tree.root) {
-            Some(new_root) => tree.root = new_root,
-            None => (),
-        }
+        rotate_left(&tree.root.clone(), &mut tree.root);
 
         tree
     }
