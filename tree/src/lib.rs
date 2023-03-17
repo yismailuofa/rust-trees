@@ -8,12 +8,6 @@ pub trait TreeTrait {
     fn print_tree(&self);
 }
 
-pub trait TreeOpsTrait {
-    fn rotate_left(&mut self);
-    fn rotate_right(&mut self);
-    fn fix_violation(&mut self);
-}
-
 pub fn prompt_user(tree: &mut impl TreeTrait) {
     let options = vec![
         "Insert a node",

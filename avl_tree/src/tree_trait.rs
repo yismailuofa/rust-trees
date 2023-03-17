@@ -30,8 +30,4 @@ impl TreeTrait for AVLNode {
     fn print_tree(&self) {
         todo!()
     }
-
-    fn new() -> Self {
-        todo!()
-    }
 }

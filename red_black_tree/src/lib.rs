@@ -24,7 +24,6 @@ enum Color {
     Red,
     Black,
 }
-
 type Tree = Rc<RefCell<RBNode>>;
 type WeakTree = Weak<RefCell<RBNode>>;
 
