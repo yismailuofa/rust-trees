@@ -19,11 +19,14 @@ impl Default for RBTree {
             root: Rc::new(RefCell::new(RBNode::Empty)),
         };
 
-        tree.insert_node(10);
-        tree.insert_node(20);
         tree.insert_node(30);
+        tree.insert_node(20);
+        tree.insert_node(10);
 
-        tree_ops_trait::rotate_left(&tree.root, &mut tree.root.clone());
+        match tree_ops_trait::rotate_right(&tree.root) {
+            Some(new_root) => tree.root = new_root,
+            None => (),
+        }
 
         tree
     }
