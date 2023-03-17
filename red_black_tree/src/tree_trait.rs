@@ -65,35 +65,7 @@ impl TreeTrait for RBNode {
             return;
         }
 
-        let mut curr = self.clone();
-
-        while let RBNode::Node {
-            key,
-            left,
-            right,
-            parent,
-            ..
-        } = &curr.clone()
-        {
-            if _key < *key {
-                let left_node = left.borrow();
-
-                if let RBNode::Empty = left_node.clone() {
-                    return;
-                } else {
-                    curr = left_node.clone();
-                }
-            } else if _key > *key {
-                let right_node = right.borrow();
-
-                if let RBNode::Empty = right_node.clone() {
-                    return;
-                } else {
-                    curr = right_node.clone();
-                }
-            } else {
-            }
-        }
+        todo!()
     }
 
     fn count_leaves(&self) -> u32 {
