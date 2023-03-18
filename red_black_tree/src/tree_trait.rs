@@ -1,5 +1,5 @@
 use std::{
-    cell::RefCell,
+    cell::{RefCell, Ref},
     rc::{Rc, Weak},
 };
 
@@ -117,7 +117,20 @@ impl TreeTrait for RBTree {
                     match (&mut *left_node, &mut *right_node) {
                         (RBNode::Empty, RBNode::Empty) => {
                             //delete node
-                            curr.replace(RBNode::Empty);
+                            match &mut *old_parent.borrow_mut() {
+                                RBNode::Node {
+                                    left: parent_left,
+                                    right: parent_right,
+                                    ..
+                                } => {
+                                    if Rc::ptr_eq(&curr, &parent_left) {
+                                        *parent_left = Rc::new(RefCell::new(RBNode::Empty));
+                                    } else if Rc::ptr_eq(&curr, &parent_right) {
+                                        *parent_right = Rc::new(RefCell::new(RBNode::Empty));
+                                    }
+                                }
+                                _ => (),
+                            };
                             return;
                         }
                         // if a node has one child, replace it with the child
@@ -143,7 +156,7 @@ impl TreeTrait for RBTree {
                                 _ => (),
                             };
                             *right_parent = Rc::downgrade(&old_parent);
-                            curr.replace(RBNode::Empty);
+                            //curr.replace(RBNode::Empty);
 
                             return;
                         }
@@ -170,41 +183,54 @@ impl TreeTrait for RBTree {
                             };
 
                             *left_parent = Rc::downgrade(&old_parent);
-                            curr.replace(RBNode::Empty);
+                            //curr.replace(RBNode::Empty);
                             return;
                         }
                         (
                             RBNode::Node {
-                                left: left_left,
-                                right: left_right,
-                                parent: left_parent,
+                                // left: left_left,
+                                // right: left_right,
+                                // parent: left_parent,
                                 ..
                             },
                             RBNode::Node {
-                                left: right_left,
-                                right: right_right,
-                                parent: right_parent,
+                                // left: right_left,
+                                // right: right_right,
+                                // parent: right_parent,
                                 ..
                             },
                         ) => {
                             //if node has two children, find the successor
                             let mut successor = right.clone();
 
-                            while let RBNode::Node { left, .. } = &*successor.clone().borrow() {
-                                let left_node = left.borrow_mut();
-                                if let RBNode::Empty = left_node.clone() {
-                                    break;
-                                } else {
-                                    successor = left.clone();
-                                }
-                            }
+
+                            // while let RBNode::Node { left, .. } = &*successor.clone().borrow() {
+                            //     let left_node = left.borrow_mut();
+                            //     if let RBNode::Empty = left_node.clone() {
+                            //         break;
+                            //     } else {
+                            //         successor = left.clone();
+                            //     }
+                            // }
 
                             // If this breaks use this LOL 🐤
-                            // loop {
-                            //     match  {
+                            // turn the above while loop into a normal loop
+                            // and then use a break statement to break out of the loop
+                            // and then use the successor variable
+                            loop {
+                                match &*successor.clone().borrow() {
+                                    RBNode::Node { left, .. } => {
+                                        let left_node = left.borrow_mut();
+                                        if let RBNode::Empty = left_node.clone() {
+                                            break;
+                                        } else {
+                                            successor = left.clone();
+                                        }
+                                    }
+                                    _ => break,
+                                };
+                            }
 
-                            //     } let
-                            // }
 
                             //replace node with successor
                             if let RBNode::Node {
@@ -221,50 +247,81 @@ impl TreeTrait for RBTree {
                                         right: parent_right,
                                         ..
                                     } => {
-                                        if Rc::ptr_eq(&parent_left, &right) {
+                                        if Rc::ptr_eq(&parent_left, &curr) {
                                             *parent_left = successor.clone();
-                                        } else if Rc::ptr_eq(&parent_right, &right) {
+                                        } else if Rc::ptr_eq(&parent_right, &curr) {
                                             *parent_right = successor.clone();
                                         }
                                     }
                                     _ => (),
                                 };
                                 *successor_left = left.clone();
-                                *successor_parent = Rc::downgrade(&old_parent);
-                                curr.replace(RBNode::Empty);
-                            }
-
-                            //delete successor
-                            if let RBNode::Node {
-                                key: _,
-                                color: _,
-                                left: _,
-                                right: _,
-                                parent: parent,
-                            } = &*successor.clone().borrow()
-                            {
-                                if let Some(parent) = parent.upgrade() {
-                                    if let RBNode::Node {
-                                        key: _,
-                                        color: _,
-                                        left: left,
-                                        right: _,
-                                        parent: _,
-                                    } = parent.borrow().clone()
-                                    {
-                                        if let RBNode::Node {
-                                            key: _,
-                                            color: _,
-                                            left: _,
-                                            right: _,
-                                            parent: _,
-                                        } = left.borrow().clone()
-                                        {
-                                            *left.borrow_mut() = RBNode::Empty;
+                                let successor_old_right = successor_right.clone();
+                                let successor_parent_strong = match successor_parent.upgrade() {
+                                    Some(_) => parent.upgrade().unwrap(),
+                                    None => Rc::new(RefCell::new(RBNode::Empty)),
+                                };
+                                match &mut *successor_parent_strong.borrow_mut() {
+                                    RBNode::Node {
+                                        left: successor_parent_left,
+                                        right: successor_parent_right,
+                                        ..
+                                    } => {
+                                        if Rc::ptr_eq(&successor_parent_left, &successor) {
+                                            *successor_parent_left = successor_right.clone();
+                                        } else if Rc::ptr_eq(&successor_parent_right, &successor) {
+                                            *successor_parent_right = successor_right.clone();
                                         }
                                     }
-                                }
-                            }
+                                    _ => (),
+                                };
+                                *successor_right = right.clone();
+                                match &mut *successor_old_right.borrow_mut() {
+                                    RBNode::Node {
+                                        parent: successor_old_right_parent,
+                                        ..
+                                    } => {
+                                        *successor_old_right_parent = Rc::downgrade(&successor_parent_strong);
+                                    }
+                                    _ => (),
+                                };
+                                    
+                                
+                                *successor_parent = Rc::downgrade(&old_parent);
+                                //curr.replace(RBNode::Empty);
+                            };
+
+                            //delete successor
+                            // if let RBNode::Node {
+                            //     key: _,
+                            //     color: _,
+                            //     left: _,
+                            //     right: _,
+                            //     parent: parent,
+                            // } = &*successor.clone().borrow()
+                            // {
+                            //     if let Some(parent) = parent.upgrade() {
+                            //         if let RBNode::Node {
+                            //             key: _,
+                            //             color: _,
+                            //             left: left,
+                            //             right: _,
+                            //             parent: _,
+                            //         } = parent.borrow().clone()
+                            //         {
+                            //             if let RBNode::Node {
+                            //                 key: _,
+                            //                 color: _,
+                            //                 left: _,
+                            //                 right: _,
+                            //                 parent: _,
+                            //             } = left.borrow().clone()
+                            //             {
+                            //                 *left.borrow_mut() = RBNode::Empty;
+                            //             }
+                            //         }
+                            //     }
+                            // }
                         }
                     }
                 }
