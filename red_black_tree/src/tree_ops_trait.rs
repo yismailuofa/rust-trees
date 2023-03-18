@@ -76,18 +76,12 @@ pub fn rotate_left(x: &Tree, root: &mut Tree) {
             //     parent.left = y
             // elif y.parent.right == x:
             //     parent.right = y
-            match &*old_parent.borrow() {
+            match &mut *old_parent.borrow_mut() {
                 RBNode::Node { left, right, .. } => {
                     if Rc::ptr_eq(&left, &x) {
-                        match &mut *old_parent.borrow_mut() {
-                            RBNode::Node { left, .. } => *left = y.clone(),
-                            _ => (),
-                        };
+                        *left = y.clone();
                     } else if Rc::ptr_eq(&right, &x) {
-                        match &mut *old_parent.borrow_mut() {
-                            RBNode::Node { right, .. } => *right = y.clone(),
-                            _ => (),
-                        };
+                        *right = y.clone();
                     }
                 }
                 _ => *root = y.clone(),
@@ -269,17 +263,17 @@ pub(crate) fn fix_violation(x: Tree, root: &mut Tree) {
                     RBNode::Empty => break,
                 };
 
-                match &*uncle.borrow() {
+                match &mut *uncle.borrow_mut() {
                     RBNode::Node { color, .. } => {
                         if color == &Color::Red {
                             match &mut *parent.borrow_mut() {
                                 RBNode::Node { color, .. } => *color = Color::Black,
                                 _ => (),
                             };
-                            match &mut *uncle.borrow_mut() {
-                                RBNode::Node { color, .. } => *color = Color::Black,
-                                _ => (),
-                            };
+
+                            // Uncle
+                            *color = Color::Black;
+
                             match &mut *grandparent.borrow_mut() {
                                 RBNode::Node { color, .. } => *color = Color::Red,
                                 _ => (),

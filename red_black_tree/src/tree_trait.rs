@@ -64,7 +64,7 @@ impl TreeTrait for RBTree {
                     }
                     curr = right.clone();
                 }
-                _ => (),
+                _ => return,
             }
         }
         fix_violation(curr, &mut self.root);

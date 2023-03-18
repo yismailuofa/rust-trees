@@ -7,19 +7,22 @@ use std::{
     rc::{Rc, Weak},
 };
 
+use tree::TreeTrait;
+
 pub struct RBTree {
     root: Tree,
 }
 
 impl Default for RBTree {
     fn default() -> Self {
-        let tree = RBTree {
+        let mut tree = RBTree {
             root: Rc::new(RefCell::new(RBNode::Empty)),
         };
 
-        // tree.insert_node(30);
-        // tree.insert_node(20);
-        // tree.insert_node(10);
+        tree.insert_node(10);
+        tree.insert_node(20);
+        tree.insert_node(30);
+        tree.insert_node(40);
 
         tree
     }
