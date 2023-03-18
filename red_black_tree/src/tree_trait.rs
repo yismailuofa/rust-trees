@@ -91,6 +91,10 @@ impl TreeTrait for RBTree {
     }
 
     fn print_tree(&self) {
+        if let RBNode::Empty = &*self.root.borrow() {
+            println!("\nTree is empty\n");
+            return;
+        }
         ptree::print_tree(&*self.root.borrow()).expect("Failed to print tree");
     }
 }

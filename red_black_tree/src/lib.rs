@@ -7,23 +7,19 @@ use std::{
     rc::{Rc, Weak},
 };
 
-use tree::TreeTrait;
-use tree_ops_trait::rotate_left;
-
 pub struct RBTree {
     root: Tree,
 }
 
 impl Default for RBTree {
     fn default() -> Self {
-        let mut tree = RBTree {
+        let tree = RBTree {
             root: Rc::new(RefCell::new(RBNode::Empty)),
         };
 
-        tree.insert_node(30);
-        tree.insert_node(10);
-
-        rotate_left(&tree.root.clone(), &mut tree.root);
+        // tree.insert_node(30);
+        // tree.insert_node(20);
+        // tree.insert_node(10);
 
         tree
     }
