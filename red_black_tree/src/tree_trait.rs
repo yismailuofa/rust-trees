@@ -1,5 +1,5 @@
 use std::{
-    cell::{RefCell, Ref},
+    cell::RefCell,
     rc::{Rc, Weak},
 };
 
@@ -71,8 +71,6 @@ impl TreeTrait for RBTree {
     }
 
     fn delete_node(&mut self, _key: u32) {
-        //delete node with key
-
         //find node with key
         let mut curr = self.root.clone();
 
@@ -82,7 +80,7 @@ impl TreeTrait for RBTree {
             right,
             parent,
             ..
-        } = &*curr.clone().borrow_mut()
+        } = &*curr.clone().borrow()
         {
             match _key.cmp(key) {
                 std::cmp::Ordering::Less => {
@@ -106,15 +104,15 @@ impl TreeTrait for RBTree {
                     }
                 }
                 std::cmp::Ordering::Equal => {
-                    let mut left_node = left.borrow_mut();
-                    let mut right_node = right.borrow_mut();
+                    // let mut left_node = left.borrow();
+                    // let mut right_node = right.borrow();
                     let old_parent = match parent.upgrade() {
                         Some(_) => parent.upgrade().unwrap(),
                         None => Rc::new(RefCell::new(RBNode::Empty)),
                     };
 
                     //if node has no children, delete it
-                    match (&mut *left_node, &mut *right_node) {
+                    match (&*left.borrow(), &*right.borrow()) {
                         (RBNode::Empty, RBNode::Empty) => {
                             //delete node
                             match &mut *old_parent.borrow_mut() {
@@ -134,13 +132,7 @@ impl TreeTrait for RBTree {
                             return;
                         }
                         // if a node has one child, replace it with the child
-                        (
-                            RBNode::Empty,
-                            RBNode::Node {
-                                parent: right_parent,
-                                ..
-                            },
-                        ) => {
+                        (RBNode::Empty, RBNode::Node { .. }) => {
                             match &mut *old_parent.borrow_mut() {
                                 RBNode::Node {
                                     left: parent_left,
@@ -155,18 +147,10 @@ impl TreeTrait for RBTree {
                                 }
                                 _ => (),
                             };
-                            *right_parent = Rc::downgrade(&old_parent);
-                            //curr.replace(RBNode::Empty);
 
                             return;
                         }
-                        (
-                            RBNode::Node {
-                                parent: left_parent,
-                                ..
-                            },
-                            RBNode::Empty,
-                        ) => {
+                        (RBNode::Node { .. }, RBNode::Empty) => {
                             match &mut *old_parent.borrow_mut() {
                                 RBNode::Node {
                                     left: parent_left,
@@ -182,41 +166,21 @@ impl TreeTrait for RBTree {
                                 _ => (),
                             };
 
-                            *left_parent = Rc::downgrade(&old_parent);
-                            //curr.replace(RBNode::Empty);
+                            // reassign the left parent
+                            if let RBNode::Node {
+                                parent: left_parent,
+                                ..
+                            } = &mut *left.borrow_mut()
+                            {
+                                *left_parent = Rc::downgrade(&old_parent);
+                            }
+
                             return;
                         }
-                        (
-                            RBNode::Node {
-                                // left: left_left,
-                                // right: left_right,
-                                // parent: left_parent,
-                                ..
-                            },
-                            RBNode::Node {
-                                // left: right_left,
-                                // right: right_right,
-                                // parent: right_parent,
-                                ..
-                            },
-                        ) => {
+                        (RBNode::Node { .. }, RBNode::Node { .. }) => {
                             //if node has two children, find the successor
                             let mut successor = right.clone();
 
-
-                            // while let RBNode::Node { left, .. } = &*successor.clone().borrow() {
-                            //     let left_node = left.borrow_mut();
-                            //     if let RBNode::Empty = left_node.clone() {
-                            //         break;
-                            //     } else {
-                            //         successor = left.clone();
-                            //     }
-                            // }
-
-                            // If this breaks use this LOL 🐤
-                            // turn the above while loop into a normal loop
-                            // and then use a break statement to break out of the loop
-                            // and then use the successor variable
                             loop {
                                 match &*successor.clone().borrow() {
                                     RBNode::Node { left, .. } => {
@@ -231,14 +195,12 @@ impl TreeTrait for RBTree {
                                 };
                             }
 
-
                             //replace node with successor
                             if let RBNode::Node {
-                                key: successor_key,
-                                color: successor_color,
                                 left: successor_left,
                                 right: successor_right,
                                 parent: successor_parent,
+                                ..
                             } = &mut *successor.borrow_mut()
                             {
                                 match &mut *old_parent.borrow_mut() {
@@ -281,47 +243,15 @@ impl TreeTrait for RBTree {
                                         parent: successor_old_right_parent,
                                         ..
                                     } => {
-                                        *successor_old_right_parent = Rc::downgrade(&successor_parent_strong);
+                                        *successor_old_right_parent =
+                                            Rc::downgrade(&successor_parent_strong);
                                     }
                                     _ => (),
                                 };
-                                    
-                                
+
                                 *successor_parent = Rc::downgrade(&old_parent);
                                 //curr.replace(RBNode::Empty);
                             };
-
-                            //delete successor
-                            // if let RBNode::Node {
-                            //     key: _,
-                            //     color: _,
-                            //     left: _,
-                            //     right: _,
-                            //     parent: parent,
-                            // } = &*successor.clone().borrow()
-                            // {
-                            //     if let Some(parent) = parent.upgrade() {
-                            //         if let RBNode::Node {
-                            //             key: _,
-                            //             color: _,
-                            //             left: left,
-                            //             right: _,
-                            //             parent: _,
-                            //         } = parent.borrow().clone()
-                            //         {
-                            //             if let RBNode::Node {
-                            //                 key: _,
-                            //                 color: _,
-                            //                 left: _,
-                            //                 right: _,
-                            //                 parent: _,
-                            //             } = left.borrow().clone()
-                            //             {
-                            //                 *left.borrow_mut() = RBNode::Empty;
-                            //             }
-                            //         }
-                            //     }
-                            // }
                         }
                     }
                 }

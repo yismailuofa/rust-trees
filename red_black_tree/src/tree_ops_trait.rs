@@ -167,18 +167,30 @@ fn rotate_right(x: &Tree, root: &mut Tree) {
             //     parent.left = y
             // elif y.parent.right == x:
             //     parent.right = y
-            match &*old_parent.borrow() {
+
+            // BUG HERE 🐛
+            // match &*old_parent.borrow() {
+            //     RBNode::Node { left, right, .. } => {
+            //         if Rc::ptr_eq(&left, &x) {
+            //             match &mut *old_parent.borrow_mut() {
+            //                 RBNode::Node { left, .. } => *left = y.clone(),
+            //                 _ => (),
+            //             };
+            //         } else if Rc::ptr_eq(&right, &x) {
+            //             match &mut *old_parent.borrow_mut() {
+            //                 RBNode::Node { right, .. } => *right = y.clone(),
+            //                 _ => (),
+            //             };
+            //         }
+            //     }
+            //     _ => *root = y.clone(),
+            // };
+            match &mut *old_parent.borrow_mut() {
                 RBNode::Node { left, right, .. } => {
                     if Rc::ptr_eq(&left, &x) {
-                        match &mut *old_parent.borrow_mut() {
-                            RBNode::Node { left, .. } => *left = y.clone(),
-                            _ => (),
-                        };
+                        *left = y.clone();
                     } else if Rc::ptr_eq(&right, &x) {
-                        match &mut *old_parent.borrow_mut() {
-                            RBNode::Node { right, .. } => *right = y.clone(),
-                            _ => (),
-                        };
+                        *right = y.clone();
                     }
                 }
                 _ => *root = y.clone(),
