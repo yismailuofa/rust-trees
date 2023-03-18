@@ -3,15 +3,14 @@ use std::{
     rc::{Rc, Weak},
 };
 
+use crate::tree_ops_trait::fix_violation;
 use tree::TreeTrait;
 
 use crate::{Color, RBNode, RBTree};
 
 impl TreeTrait for RBTree {
     fn insert_node(&mut self, _key: u32) {
-        let root = self.root.borrow_mut().clone();
-
-        if let RBNode::Empty = root {
+        if let RBNode::Empty = self.root.borrow_mut().clone() {
             *self.root.borrow_mut() = RBNode::Node {
                 key: _key,
                 color: Color::Black,
@@ -23,48 +22,49 @@ impl TreeTrait for RBTree {
             return;
         }
 
-        let mut curr = root;
+        let mut curr = self.root.clone();
 
         while let RBNode::Node {
             key, left, right, ..
-        } = &curr.clone()
+        } = &*curr.clone().borrow()
         {
             match _key.cmp(key) {
                 std::cmp::Ordering::Less => {
                     let mut left_node = left.borrow_mut();
 
-                    if let RBNode::Empty = left_node.clone() {
+                    if let RBNode::Empty = *left_node {
                         *left_node = RBNode::Node {
                             key: _key,
                             color: Color::Red,
                             left: Rc::new(RefCell::new(RBNode::Empty)),
                             right: Rc::new(RefCell::new(RBNode::Empty)),
-                            parent: Rc::downgrade(&Rc::new(RefCell::new(curr))),
+                            parent: Rc::downgrade(&curr.clone()),
                         };
-                        return;
-                    } else {
-                        curr = left_node.clone();
+                        curr = left.clone();
+                        break;
                     }
+                    curr = left.clone();
                 }
                 std::cmp::Ordering::Greater => {
                     let mut right_node = right.borrow_mut();
 
-                    if let RBNode::Empty = right_node.clone() {
+                    if let RBNode::Empty = *right_node {
                         *right_node = RBNode::Node {
                             key: _key,
                             color: Color::Red,
                             left: Rc::new(RefCell::new(RBNode::Empty)),
                             right: Rc::new(RefCell::new(RBNode::Empty)),
-                            parent: Rc::downgrade(&Rc::new(RefCell::new(curr))),
+                            parent: Rc::downgrade(&curr.clone()),
                         };
-                        return;
-                    } else {
-                        curr = right_node.clone();
+                        curr = right.clone();
+                        break;
                     }
+                    curr = right.clone();
                 }
                 _ => (),
             }
         }
+        fix_violation(curr, &mut self.root);
     }
 
     fn delete_node(&mut self, _key: u32) {

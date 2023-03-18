@@ -127,7 +127,7 @@ if parent.left == y:
 elif y.parent.right == y:
     parent.right = x
 */
-pub fn rotate_right(x: &Tree, root: &mut Tree) {
+fn rotate_right(x: &Tree, root: &mut Tree) {
     match &mut *x.borrow_mut() {
         RBNode::Node { left, parent, .. } => {
             let old_parent = match parent.upgrade() {
@@ -226,7 +226,7 @@ pub fn rotate_right(x: &Tree, root: &mut Tree) {
 //         if z == self.root:
 //             break
 //     self.root.color = BLACK
-fn fix_violation(x: Tree, root: &mut Tree) {
+pub(crate) fn fix_violation(x: Tree, root: &mut Tree) {
     let mut curr = x;
 
     match &*curr.clone().borrow() {
