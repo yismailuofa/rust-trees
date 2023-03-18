@@ -10,16 +10,19 @@ use crate::{Color, RBNode, RBTree};
 
 impl TreeTrait for RBTree {
     fn insert_node(&mut self, _key: u32) {
-        if let RBNode::Empty = self.root.borrow_mut().clone() {
-            *self.root.borrow_mut() = RBNode::Node {
-                key: _key,
-                color: Color::Black,
-                left: Rc::new(RefCell::new(RBNode::Empty)),
-                right: Rc::new(RefCell::new(RBNode::Empty)),
-                parent: Weak::new(),
-            };
+        match &*self.root.clone().borrow() {
+            RBNode::Empty => {
+                self.root = Rc::new(RefCell::new(RBNode::Node {
+                    key: _key,
+                    color: Color::Black,
+                    left: Rc::new(RefCell::new(RBNode::Empty)),
+                    right: Rc::new(RefCell::new(RBNode::Empty)),
+                    parent: Weak::new(),
+                }));
 
-            return;
+                return;
+            }
+            _ => (),
         }
 
         let mut curr = self.root.clone();

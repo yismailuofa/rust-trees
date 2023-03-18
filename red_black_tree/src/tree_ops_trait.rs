@@ -233,108 +233,119 @@ pub(crate) fn fix_violation(x: Tree, root: &mut Tree) {
         RBNode::Node {
             parent: node_parent,
             ..
-        } => loop {
-            let parent = match node_parent.upgrade() {
-                Some(n) => {
-                    match &*n.borrow() {
-                        RBNode::Node { color, .. } => {
-                            if color == &Color::Black {
-                                break;
+        } => {
+            loop {
+                let parent = match node_parent.upgrade() {
+                    Some(n) => {
+                        match &*n.borrow() {
+                            RBNode::Node { color, .. } => {
+                                if color == &Color::Black {
+                                    break;
+                                }
                             }
-                        }
-                        _ => break,
-                    };
-                    n
-                }
-                None => break,
-            };
-
-            let grandparent = match &*parent.borrow() {
-                RBNode::Node { parent, .. } => match parent.upgrade() {
-                    Some(n) => n,
+                            _ => break,
+                        };
+                        n
+                    }
                     None => break,
-                },
-                RBNode::Empty => break,
-            };
+                };
 
-            let uncle = match &*grandparent.borrow() {
-                RBNode::Node { left, right, .. } => {
-                    if Rc::ptr_eq(&left, &parent) {
-                        right.clone()
-                    } else {
-                        left.clone()
-                    }
-                }
-                RBNode::Empty => break,
-            };
+                let grandparent = match &*parent.borrow() {
+                    RBNode::Node { parent, .. } => match parent.upgrade() {
+                        Some(n) => n,
+                        None => break,
+                    },
+                    RBNode::Empty => break,
+                };
 
-            match &*uncle.borrow() {
-                RBNode::Node { color, .. } => {
-                    if color == &Color::Red {
-                        match &mut *parent.borrow_mut() {
-                            RBNode::Node { color, .. } => *color = Color::Black,
-                            _ => (),
-                        };
-                        match &mut *uncle.borrow_mut() {
-                            RBNode::Node { color, .. } => *color = Color::Black,
-                            _ => (),
-                        };
-                        match &mut *grandparent.borrow_mut() {
-                            RBNode::Node { color, .. } => *color = Color::Red,
-                            _ => (),
-                        };
-
-                        curr = grandparent.clone();
-                    }
-                }
-                RBNode::Empty => {
-                    let parent_left = match &*parent.borrow() {
-                        RBNode::Node { left, .. } => left.clone(),
-                        RBNode::Empty => break,
-                    };
-
-                    let parent_right = match &*parent.borrow() {
-                        RBNode::Node { right, .. } => right.clone(),
-                        RBNode::Empty => break,
-                    };
-
-                    let grandparent_left = match &*grandparent.borrow() {
-                        RBNode::Node { left, .. } => left.clone(),
-                        RBNode::Empty => break,
-                    };
-
-                    if Rc::ptr_eq(&parent, &grandparent_left) {
-                        if Rc::ptr_eq(&curr, &parent_right) {
-                            curr = parent.clone();
-                            rotate_left(&parent, root);
+                let uncle = match &*grandparent.borrow() {
+                    RBNode::Node { left, right, .. } => {
+                        if Rc::ptr_eq(&left, &parent) {
+                            right.clone()
+                        } else {
+                            left.clone()
                         }
-                        match &mut *parent.borrow_mut() {
-                            RBNode::Node { color, .. } => *color = Color::Black,
-                            _ => (),
-                        };
-                        match &mut *grandparent.borrow_mut() {
-                            RBNode::Node { color, .. } => *color = Color::Red,
-                            _ => (),
-                        };
-                        rotate_right(&grandparent, root);
-                    } else {
-                        if Rc::ptr_eq(&curr, &parent_left) {
-                            curr = parent.clone();
-                            rotate_right(&parent, root);
-                        }
-                        match &mut *parent.borrow_mut() {
-                            RBNode::Node { color, .. } => *color = Color::Black,
-                            _ => (),
-                        };
-                        match &mut *grandparent.borrow_mut() {
-                            RBNode::Node { color, .. } => *color = Color::Red,
-                            _ => (),
-                        };
-                        rotate_left(&grandparent, root);
                     }
+                    RBNode::Empty => break,
+                };
+
+                match &*uncle.borrow() {
+                    RBNode::Node { color, .. } => {
+                        if color == &Color::Red {
+                            match &mut *parent.borrow_mut() {
+                                RBNode::Node { color, .. } => *color = Color::Black,
+                                _ => (),
+                            };
+                            match &mut *uncle.borrow_mut() {
+                                RBNode::Node { color, .. } => *color = Color::Black,
+                                _ => (),
+                            };
+                            match &mut *grandparent.borrow_mut() {
+                                RBNode::Node { color, .. } => *color = Color::Red,
+                                _ => (),
+                            };
+
+                            curr = grandparent.clone();
+                        }
+                    }
+                    RBNode::Empty => {
+                        let parent_left = match &*parent.borrow() {
+                            RBNode::Node { left, .. } => left.clone(),
+                            RBNode::Empty => break,
+                        };
+
+                        let parent_right = match &*parent.borrow() {
+                            RBNode::Node { right, .. } => right.clone(),
+                            RBNode::Empty => break,
+                        };
+
+                        let grandparent_left = match &*grandparent.borrow() {
+                            RBNode::Node { left, .. } => left.clone(),
+                            RBNode::Empty => break,
+                        };
+
+                        if Rc::ptr_eq(&parent, &grandparent_left) {
+                            if Rc::ptr_eq(&curr, &parent_right) {
+                                curr = parent.clone();
+                                rotate_left(&parent, root);
+                            }
+                            match &mut *parent.borrow_mut() {
+                                RBNode::Node { color, .. } => *color = Color::Black,
+                                _ => (),
+                            };
+                            match &mut *grandparent.borrow_mut() {
+                                RBNode::Node { color, .. } => *color = Color::Red,
+                                _ => (),
+                            };
+                            rotate_right(&grandparent, root);
+                        } else {
+                            if Rc::ptr_eq(&curr, &parent_left) {
+                                curr = parent.clone();
+                                rotate_right(&parent, root);
+                            }
+                            match &mut *parent.borrow_mut() {
+                                RBNode::Node { color, .. } => *color = Color::Black,
+                                _ => (),
+                            };
+                            match &mut *grandparent.borrow_mut() {
+                                RBNode::Node { color, .. } => *color = Color::Red,
+                                _ => (),
+                            };
+                            rotate_left(&grandparent, root);
+                        }
+                    }
+                };
+
+                if Rc::ptr_eq(&curr, root) {
+                    break;
                 }
+            }
+
+            match &mut *root.borrow_mut() {
+                RBNode::Node { color, .. } => *color = Color::Black,
+                _ => (),
             };
-        },
+        }
         _ => (),
     };
 }
