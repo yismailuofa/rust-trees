@@ -220,7 +220,7 @@ fn rotate_right(x: &Tree, root: &mut Tree) {
 //         if z == self.root:
 //             break
 //     self.root.color = BLACK
-pub(crate) fn fix_violation(x: Tree, root: &mut Tree) {
+pub fn insert_fixup(x: Tree, root: &mut Tree) {
     let mut curr = x;
 
     match &*curr.clone().borrow() {
