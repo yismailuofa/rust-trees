@@ -1,4 +1,5 @@
 mod print;
+mod rbnode;
 mod tree_ops_trait;
 mod tree_trait;
 
@@ -46,14 +47,4 @@ pub enum RBNode {
         parent: WeakTree,
     },
     Empty,
-}
-
-impl PartialEq for RBNode {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (RBNode::Node { key, .. }, RBNode::Node { key: other_key, .. }) => key == other_key,
-            (RBNode::Empty, RBNode::Empty) => true,
-            _ => false,
-        }
-    }
 }

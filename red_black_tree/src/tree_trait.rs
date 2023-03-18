@@ -3,10 +3,10 @@ use std::{
     rc::{Rc, Weak},
 };
 
-use crate::tree_ops_trait::fix_violation;
 use tree::TreeTrait;
+use tree_ops_trait::insert_fixup;
 
-use crate::{Color, RBNode, RBTree};
+use crate::{tree_ops_trait, Color, RBNode, RBTree};
 
 impl TreeTrait for RBTree {
     fn insert_node(&mut self, _key: u32) {
@@ -41,7 +41,7 @@ impl TreeTrait for RBTree {
                             color: Color::Red,
                             left: Rc::new(RefCell::new(RBNode::Empty)),
                             right: Rc::new(RefCell::new(RBNode::Empty)),
-                            parent: Rc::downgrade(&curr.clone()),
+                            parent: Rc::downgrade(&curr),
                         };
                         curr = left.clone();
                         break;
@@ -57,7 +57,7 @@ impl TreeTrait for RBTree {
                             color: Color::Red,
                             left: Rc::new(RefCell::new(RBNode::Empty)),
                             right: Rc::new(RefCell::new(RBNode::Empty)),
-                            parent: Rc::downgrade(&curr.clone()),
+                            parent: Rc::downgrade(&curr),
                         };
                         curr = right.clone();
                         break;
@@ -67,7 +67,7 @@ impl TreeTrait for RBTree {
                 _ => return,
             }
         }
-        fix_violation(curr, &mut self.root);
+        insert_fixup(curr, &mut self.root);
     }
 
     fn delete_node(&mut self, _key: u32) {
@@ -335,19 +335,23 @@ impl TreeTrait for RBTree {
     }
 
     fn count_leaves(&self) -> u32 {
-        todo!()
+        self.root.borrow().count_leaves()
     }
 
     fn height(&self) -> u32 {
-        todo!()
+        self.root.borrow().height()
     }
 
     fn in_order(&self) -> Vec<u32> {
-        todo!()
+        self.root.borrow().in_order()
     }
 
     fn is_empty(&self) -> bool {
-        todo!()
+        if let RBNode::Empty = &*self.root.borrow() {
+            true
+        } else {
+            false
+        }
     }
 
     fn print_tree(&self) {
