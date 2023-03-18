@@ -1,5 +1,4 @@
 use std::{
-    borrow::Borrow,
     cell::RefCell,
     rc::{Rc, Weak},
 };
@@ -75,36 +74,38 @@ impl TreeTrait for RBTree {
         //delete node with key
 
         //find node with key
-        let root = self.root.borrow_mut();
-        let mut curr = root;
+        let mut curr = self.root.clone();
 
         while let RBNode::Node {
-            key, left, right, parent, ..
-        } = &curr.clone()
+            key,
+            left,
+            right,
+            parent,
+            ..
+        } = &*curr.clone().borrow_mut()
         {
             match _key.cmp(key) {
                 std::cmp::Ordering::Less => {
-                    let mut left_node = left.borrow_mut();
+                    let left_node = left.borrow_mut();
 
                     if let RBNode::Empty = left_node.clone() {
                         println!("Node not found");
                         return;
                     } else {
-                        curr = left_node;
+                        curr = left.clone();
                     }
                 }
                 std::cmp::Ordering::Greater => {
-                    let mut right_node = right.borrow_mut();
+                    let right_node = right.borrow_mut();
 
                     if let RBNode::Empty = right_node.clone() {
                         println!("Node not found");
                         return;
                     } else {
-                        curr = right_node;
+                        curr = right.clone();
                     }
                 }
                 std::cmp::Ordering::Equal => {
-                    //if node has no children, delete it
                     let mut left_node = left.borrow_mut();
                     let mut right_node = right.borrow_mut();
                     let old_parent = match parent.upgrade() {
@@ -112,44 +113,64 @@ impl TreeTrait for RBTree {
                         None => Rc::new(RefCell::new(RBNode::Empty)),
                     };
 
+                    //if node has no children, delete it
                     match (&mut *left_node, &mut *right_node) {
                         (RBNode::Empty, RBNode::Empty) => {
                             //delete node
-                            *curr = RBNode::Empty;
+                            curr.replace(RBNode::Empty);
                             return;
                         }
                         // if a node has one child, replace it with the child
-                        (RBNode::Empty, RBNode::Node { parent:right_parent, .. }) => {
-                            
+                        (
+                            RBNode::Empty,
+                            RBNode::Node {
+                                parent: right_parent,
+                                ..
+                            },
+                        ) => {
                             match &mut *old_parent.borrow_mut() {
-                                RBNode::Node { left:parent_left, right:parent_right, .. } => {
-                                    if (*parent_left.borrow()== curr) {
+                                RBNode::Node {
+                                    left: parent_left,
+                                    right: parent_right,
+                                    ..
+                                } => {
+                                    if Rc::ptr_eq(&curr, &parent_left) {
                                         *parent_left = right.clone();
-                                    } else if (*parent_right.borrow()== curr) {
+                                    } else if Rc::ptr_eq(&curr, &parent_right) {
                                         *parent_right = right.clone();
                                     }
                                 }
-                                _ => (), // this is the case where the old rotation point was the root, this is wht indicates to update root
+                                _ => (),
                             };
                             *right_parent = Rc::downgrade(&old_parent);
-                            *curr = RBNode::Empty;
-                            
+                            curr.replace(RBNode::Empty);
+
                             return;
                         }
-                        (RBNode::Node { parent:left_parent, .. }, RBNode::Empty) => {
+                        (
+                            RBNode::Node {
+                                parent: left_parent,
+                                ..
+                            },
+                            RBNode::Empty,
+                        ) => {
                             match &mut *old_parent.borrow_mut() {
-                                RBNode::Node { left:parent_left, right:parent_right, .. } => {
-                                    if (*parent_left.borrow()== curr) {
+                                RBNode::Node {
+                                    left: parent_left,
+                                    right: parent_right,
+                                    ..
+                                } => {
+                                    if Rc::ptr_eq(&curr, &parent_left) {
                                         *parent_left = left.clone();
-                                    } else if (*parent_right.borrow()== curr) {
+                                    } else if Rc::ptr_eq(&curr, &parent_right) {
                                         *parent_right = left.clone();
                                     }
                                 }
-                                _ => (), // this is the case where the old rotation point was the root, this is wht indicates to update root
+                                _ => (),
                             };
-                            
+
                             *left_parent = Rc::downgrade(&old_parent);
-                            *curr = RBNode::Empty;
+                            curr.replace(RBNode::Empty);
                             return;
                         }
                         (
@@ -167,22 +188,23 @@ impl TreeTrait for RBTree {
                             },
                         ) => {
                             //if node has two children, find the successor
-                            let mut successor = right;
+                            let mut successor = right.clone();
 
-                            while let RBNode::Node {
-                                key: _,
-                                left: left,
-                                right: _,
-                                ..
-                            } = &*successor.borrow_mut()
-                            {
-                                let mut left_node = left.borrow_mut();
+                            while let RBNode::Node { left, .. } = &*successor.clone().borrow() {
+                                let left_node = left.borrow_mut();
                                 if let RBNode::Empty = left_node.clone() {
                                     break;
                                 } else {
-                                    successor = left;
+                                    successor = left.clone();
                                 }
                             }
+
+                            // If this breaks use this LOL 🐤
+                            // loop {
+                            //     match  {
+
+                            //     } let
+                            // }
 
                             //replace node with successor
                             if let RBNode::Node {
@@ -191,20 +213,25 @@ impl TreeTrait for RBTree {
                                 left: successor_left,
                                 right: successor_right,
                                 parent: successor_parent,
-                            } = &mut *successor.borrow_mut() {
+                            } = &mut *successor.borrow_mut()
+                            {
                                 match &mut *old_parent.borrow_mut() {
-                                    RBNode::Node { left:parent_left, right:parent_right, .. } => {
+                                    RBNode::Node {
+                                        left: parent_left,
+                                        right: parent_right,
+                                        ..
+                                    } => {
                                         if Rc::ptr_eq(&parent_left, &right) {
                                             *parent_left = successor.clone();
                                         } else if Rc::ptr_eq(&parent_right, &right) {
                                             *parent_right = successor.clone();
                                         }
                                     }
-                                    _ => (), // this is the case where the old rotation point was the root, this is wht indicates to update root
+                                    _ => (),
                                 };
                                 *successor_left = left.clone();
                                 *successor_parent = Rc::downgrade(&old_parent);
-                                *curr = RBNode::Empty;
+                                curr.replace(RBNode::Empty);
                             }
 
                             //delete successor
@@ -214,7 +241,7 @@ impl TreeTrait for RBTree {
                                 left: _,
                                 right: _,
                                 parent: parent,
-                            } = successor.borrow().clone()
+                            } = &*successor.clone().borrow()
                             {
                                 if let Some(parent) = parent.upgrade() {
                                     if let RBNode::Node {
@@ -240,8 +267,6 @@ impl TreeTrait for RBTree {
                             }
                         }
                     }
-
-                    
                 }
             }
         }
