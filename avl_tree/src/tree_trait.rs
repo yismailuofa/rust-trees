@@ -10,6 +10,7 @@ use crate::{tree_ops_trait, AVLNode, AVLTree};
 
 impl TreeTrait for AVLTree {
     fn insert_node(&mut self, _key: u32) {
+        // BASE CASE
         match &*self.root.clone().borrow() {
             AVLNode::Empty => {
                 self.root = Rc::new(RefCell::new(AVLNode::Node {
@@ -22,6 +23,8 @@ impl TreeTrait for AVLTree {
             }
             _ => (),
         }
+
+        // INSERT AT CORRECT POSITION
 
         let mut curr = self.root.clone();
 
@@ -76,6 +79,8 @@ impl TreeTrait for AVLTree {
                 _ => return,
             }
         }
+
+        // BALANCE TREE
 
         loop {
             match &*curr.clone().borrow() {
