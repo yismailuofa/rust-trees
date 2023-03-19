@@ -121,67 +121,64 @@ if parent.left == y:
 elif y.parent.right == y:
     parent.right = x
 */
-fn rotate_right(x: &Tree, root: &mut Tree) {
-    match &mut *x.borrow_mut() {
+fn rotate_right(y: &Tree, root: &mut Tree) {
+    match &mut *y.borrow_mut() {
         RBNode::Node { left, parent, .. } => {
             let old_parent = match parent.upgrade() {
                 Some(_) => parent.upgrade().unwrap(),
                 None => Rc::new(RefCell::new(RBNode::Empty)),
-            }; // parent = x.parent
-            let y = left.clone(); // y = x.left
+            }; // parent = y.parent
+            let x = left.clone(); // x = y.left
 
-            // T2 = y.right
-            let t2 = match &*y.borrow() {
+            println!("x: {:?}", x);
+            println!("y: {:?}", y);
+
+            // T2 = x.right
+            let t2 = match &*x.borrow_mut() {
                 RBNode::Node { right, .. } => right.clone(),
                 RBNode::Empty => Rc::new(RefCell::new(RBNode::Empty)),
             };
-
-            // y.right = x
-            match &mut *y.borrow_mut() {
-                RBNode::Node { right, .. } => *right = x.clone(),
+            // x.right = y
+            match &mut *x.borrow_mut() {
+                RBNode::Node { right, .. } => *right = y.clone(),
                 _ => (),
             };
 
-            //x.left = t2
+            //y.left = t2
             *left = t2.clone();
 
             // if t2:
-            //     t2.parent = x
+            //     t2.parent = y
             match &*t2.borrow() {
                 RBNode::Node { .. } => match &mut *t2.borrow_mut() {
-                    RBNode::Node { parent, .. } => *parent = Rc::downgrade(&x),
+                    RBNode::Node { parent, .. } => *parent = Rc::downgrade(&y),
                     _ => (),
                 },
                 _ => (),
             };
 
-            // y.parent = parent
-            match &mut *y.borrow_mut() {
+            // x.parent = parent
+            match &mut *x.borrow_mut() {
                 RBNode::Node { parent, .. } => *parent = Rc::downgrade(&old_parent),
                 _ => (),
             };
 
             // if parent is None:
-            //     self.root = y
-            // elif parent.left == x:
-            //     parent.left = y
-            // elif y.parent.right == x:
-            //     parent.right = y
-            match &*old_parent.borrow() {
+            //     self.root = x
+            // elif parent.left == y:
+            //     parent.left = x
+            // elif x.parent.right == y:
+            //     parent.right = x
+
+            match &mut *old_parent.borrow_mut() {
                 RBNode::Node { left, right, .. } => {
-                    if Rc::ptr_eq(&left, &x) {
-                        match &mut *old_parent.borrow_mut() {
-                            RBNode::Node { left, .. } => *left = y.clone(),
-                            _ => (),
-                        };
-                    } else if Rc::ptr_eq(&right, &x) {
-                        match &mut *old_parent.borrow_mut() {
-                            RBNode::Node { right, .. } => *right = y.clone(),
-                            _ => (),
-                        };
+                    if Rc::ptr_eq(&left, &y) {
+                        *left = x.clone();
+                    } else if Rc::ptr_eq(&right, &y) {
+                        *right = x.clone();
                     }
                 }
-                _ => *root = y.clone(),
+                _ => *root = x.clone(),
             };
         }
         _ => (),
