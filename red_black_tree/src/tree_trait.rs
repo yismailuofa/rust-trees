@@ -1,5 +1,5 @@
 use std::{
-    cell::{RefCell, Ref},
+    cell::{RefCell},
     rc::{Rc, Weak},
 };
 
@@ -200,9 +200,7 @@ impl TreeTrait for RBTree {
                                 ..
                             },
                             RBNode::Node {
-                                left: right_left,
-                                right: right_right,
-                                parent: right_parent,
+                                left: right_left,                                
                                 ..
                             },
                         ) => {
@@ -280,11 +278,10 @@ impl TreeTrait for RBTree {
                             } else{
                                 match &mut *successor.borrow_mut() {
                                     RBNode::Node {
-                                        key: successor_key,
-                                        color: successor_color,
                                         left: successor_left,
                                         right: successor_right,
                                         parent: successor_parent,
+                                        ..
                                     } => {
                                         match &mut *old_parent.borrow_mut() {
                                             RBNode::Node {
