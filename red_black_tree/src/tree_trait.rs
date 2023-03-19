@@ -6,7 +6,7 @@ use std::{
 use tree::TreeTrait;
 use tree_ops_trait::insert_fixup;
 
-use crate::{tree_ops_trait, Color, RBNode, RBTree};
+use crate::{tree_ops_trait::{self, delete_fixup}, Color, RBNode, RBTree};
 
 impl TreeTrait for RBTree {
     fn insert_node(&mut self, _key: u32) {
@@ -246,6 +246,7 @@ impl TreeTrait for RBTree {
                                         *right_left = left.clone();
                                     }
                                 }
+                                curr = successor.clone();
                                 return;
                             } else {
                                 match &mut *successor.borrow_mut() {
@@ -321,6 +322,8 @@ impl TreeTrait for RBTree {
                                 if Rc::ptr_eq(&self.root, &curr) {
                                     self.root = successor.clone();
                                 }
+                                curr = successor.clone();
+                                delete_fixup(curr, &mut self.root);
                                 return;
                             };
                         }
