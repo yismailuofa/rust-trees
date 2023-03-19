@@ -193,9 +193,270 @@ impl TreeTrait for AVLTree {
             }
         }
     }
+    // def delete(self, root, key):
+    //     if not root:
+    //         return root
 
+    //     parent = None
+    //     curr = root
+    //     while curr and curr.val != key:
+    //         parent = curr
+    //         if key < curr.val:
+    //             curr = curr.left
+    //         else:
+    //             curr = curr.right
+
+    //     if not curr:
+    //         return root
+
+    //     if not curr.left or not curr.right:
+    //         child = curr.left or curr.right
+    //         if not parent:
+    //             root = child
+    //         elif parent.left == curr:
+    //             parent.left = child
+    //         else:
+    //             parent.right = child
+    //     else:
+    //         successor = curr.right
+    //         successor_parent = curr
+    //         while successor.left:
+    //             successor_parent = successor
+    //             successor = successor.left
+
+    //         curr.val = successor.val
+    //         if successor_parent.left == successor:
+    //             successor_parent.left = successor.right
+    //         else:
+    //             successor_parent.right = successor.right
+
+    //     curr = parent
+    //     while curr:
+    //         curr.height = 1 + max(self.getHeight(curr.left), self.getHeight(curr.right))
+    //         balance = self.getBalance(curr)
+
+    //         if balance > 1 and self.getBalance(curr.left) >= 0:
+    //             curr = self.rightRotate(curr)
+    //             break
+    //         elif balance < -1 and self.getBalance(curr.right) <= 0:
+    //             curr = self.leftRotate(curr)
+    //             break
+    //         elif balance > 1 and self.getBalance(curr.left) < 0:
+    //             curr.left = self.leftRotate(curr.left)
+    //             curr = self.rightRotate(curr)
+    //             break
+    //         elif balance < -1 and self.getBalance(curr.right) > 0:
+    //             curr.right = self.rightRotate(curr.right)
+    //             curr = self.leftRotate(curr)
+    //             break
+
+    //         parent = curr
+    //         curr = curr.parent
+
+    //     return root
     fn delete_node(&mut self, _key: u32) {
-        todo!()
+        if let AVLNode::Empty = &*self.root.borrow() {
+            return;
+        }
+
+        let mut curr = self.root.clone();
+
+        while let AVLNode::Node { key, .. } = &*curr.clone().borrow_mut() {
+            match _key.cmp(key) {
+                std::cmp::Ordering::Less => {
+                    let left = match &*curr.borrow() {
+                        AVLNode::Node { left, .. } => left.clone(),
+                        _ => return,
+                    };
+
+                    curr = left;
+                }
+                std::cmp::Ordering::Greater => {
+                    let right = match &*curr.borrow() {
+                        AVLNode::Node { right, .. } => right.clone(),
+                        _ => return,
+                    };
+
+                    curr = right;
+                }
+                _ => break,
+            }
+        }
+
+        if let AVLNode::Empty = &*curr.borrow() {
+            return;
+        };
+
+        let mut parent = match &*curr.borrow() {
+            AVLNode::Node { parent, .. } => match parent.upgrade() {
+                Some(parent) => parent,
+                None => return,
+            },
+            _ => Rc::new(RefCell::new(AVLNode::Empty)),
+        };
+
+        let mut flag = false;
+        let mut child = Rc::new(RefCell::new(AVLNode::Empty));
+        if let AVLNode::Node { left, right, .. } = &mut *curr.borrow_mut() {
+            let left_empty = match &*left.borrow() {
+                AVLNode::Empty => true,
+                _ => false,
+            };
+
+            let right_empty = match &*right.borrow() {
+                AVLNode::Empty => true,
+                _ => false,
+            };
+
+            if left_empty || right_empty {
+                child = if left_empty {
+                    right.clone()
+                } else if right_empty {
+                    left.clone()
+                } else {
+                    Rc::new(RefCell::new(AVLNode::Empty))
+                };
+
+                match &mut *parent.borrow_mut() {
+                    AVLNode::Node { left, right, .. } => {
+                        if Rc::ptr_eq(&curr, left) {
+                            *left = child.clone();
+                        } else if Rc::ptr_eq(&curr, right) {
+                            *right = child.clone();
+                        }
+                    }
+                    AVLNode::Empty => flag = true, // May fuck up hard
+                }
+            } else {
+                let mut successor = right.clone();
+                let mut successor_parent = curr.clone();
+
+                while let AVLNode::Node { left, .. } = &*successor.clone().borrow() {
+                    successor_parent = successor.clone();
+                    successor = left.clone();
+                }
+
+                if let AVLNode::Node { key, .. } = &*successor.borrow() {
+                    match &mut *curr.borrow_mut() {
+                        AVLNode::Node { key: curr_key, .. } => *curr_key = *key,
+                        _ => (),
+                    }
+                }
+
+                if let AVLNode::Node { left, .. } = &*successor_parent.borrow() {
+                    if Rc::ptr_eq(&successor, left) {
+                        match &mut *successor_parent.borrow_mut() {
+                            AVLNode::Node { left, .. } => *left = right.clone(),
+                            _ => (),
+                        }
+                    } else {
+                        match &mut *successor_parent.borrow_mut() {
+                            AVLNode::Node { right, .. } => *right = right.clone(),
+                            _ => (),
+                        }
+                    }
+                };
+            }
+        };
+
+        if flag {
+            self.root = child;
+        }
+
+        let mut curr = parent.clone();
+
+        loop {
+            match &mut *curr.borrow_mut() {
+                AVLNode::Node {
+                    height,
+                    left,
+                    right,
+                    ..
+                } => *height = 1 + std::cmp::max(left.borrow().height(), right.borrow().height()),
+                _ => break,
+            }
+
+            let balance = curr.borrow().balance();
+
+            if balance > 1 {
+                let case = match &*curr.clone().borrow() {
+                    AVLNode::Node { left, .. } => {
+                        if left.borrow().balance() >= 0 {
+                            1
+                        } else if left.borrow().balance() < 0 {
+                            2
+                        } else {
+                            0
+                        }
+                    }
+                    _ => 0,
+                };
+
+                match case {
+                    1 => curr = rotate_right(&curr, &mut self.root),
+                    2 => {
+                        let left = match &*curr.borrow() {
+                            AVLNode::Node { left, .. } => left.clone(),
+                            _ => Rc::new(RefCell::new(AVLNode::Empty)),
+                        };
+
+                        let left_node = rotate_left(&left.clone(), &mut self.root);
+
+                        match &mut *curr.clone().borrow_mut() {
+                            AVLNode::Node { left, .. } => *left = left_node,
+                            _ => (),
+                        }
+
+                        curr = rotate_right(&curr, &mut self.root);
+                    }
+                    _ => (),
+                }
+            } else if balance < -1 {
+                let case = match &*curr.clone().borrow() {
+                    AVLNode::Node { right, .. } => {
+                        if right.borrow().balance() <= 0 {
+                            2
+                        } else if right.borrow().balance() > 0 {
+                            1
+                        } else {
+                            0
+                        }
+                    }
+                    _ => 0,
+                };
+
+                // Avoids passing a borrow_mut() to rotate_right() and rotate_left()
+                // which would cause a double borrow_mut() error
+                match case {
+                    1 => {
+                        let right = match &*curr.borrow() {
+                            AVLNode::Node { right, .. } => right.clone(),
+                            _ => Rc::new(RefCell::new(AVLNode::Empty)),
+                        };
+
+                        let right_node = rotate_right(&right.clone(), &mut self.root);
+
+                        match &mut *curr.clone().borrow_mut() {
+                            AVLNode::Node { right, .. } => *right = right_node,
+                            _ => (),
+                        }
+
+                        curr = rotate_left(&curr, &mut self.root);
+                    }
+                    2 => curr = rotate_left(&curr, &mut self.root),
+                    _ => (),
+                }
+            }
+
+            parent = curr.clone();
+            curr = match &*curr.clone().borrow() {
+                AVLNode::Node { parent, .. } => match parent.upgrade() {
+                    Some(parent) => parent,
+                    None => return,
+                },
+                _ => return,
+            };
+        }
     }
 
     fn count_leaves(&self) -> u32 {
