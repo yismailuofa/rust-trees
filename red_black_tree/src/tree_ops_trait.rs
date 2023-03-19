@@ -40,7 +40,7 @@ pub fn rotate_left(x: &Tree, root: &mut Tree) {
             let y = right.clone(); // y = x.right
 
             // T2 = y.left
-            let t2 = match &*y.borrow_mut() {
+            let t2 = match &*y.borrow() {
                 RBNode::Node { left, .. } => left.clone(),
                 RBNode::Empty => Rc::new(RefCell::new(RBNode::Empty)),
             };
@@ -130,21 +130,19 @@ fn rotate_right(y: &Tree, root: &mut Tree) {
             }; // parent = y.parent
             let x = left.clone(); // x = y.left
 
-            println!("x: {:?}", x);
-            println!("y: {:?}", y);
-
             // T2 = x.right
-            let t2 = match &*x.borrow_mut() {
+            let t2 = match &*x.borrow() {
                 RBNode::Node { right, .. } => right.clone(),
                 RBNode::Empty => Rc::new(RefCell::new(RBNode::Empty)),
             };
+
             // x.right = y
             match &mut *x.borrow_mut() {
                 RBNode::Node { right, .. } => *right = y.clone(),
                 _ => (),
             };
 
-            //y.left = t2
+            // y.left = t2
             *left = t2.clone();
 
             // if t2:
@@ -167,9 +165,8 @@ fn rotate_right(y: &Tree, root: &mut Tree) {
             //     self.root = x
             // elif parent.left == y:
             //     parent.left = x
-            // elif x.parent.right == y:
+            // elif y.parent.right == y:
             //     parent.right = x
-
             match &mut *old_parent.borrow_mut() {
                 RBNode::Node { left, right, .. } => {
                     if Rc::ptr_eq(&left, &y) {
