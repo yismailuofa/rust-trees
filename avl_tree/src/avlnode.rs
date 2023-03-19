@@ -34,4 +34,13 @@ impl AVLNode {
             AVLNode::Empty => Vec::new(),
         }
     }
+
+    pub fn balance(&self) -> i32 {
+        match self {
+            AVLNode::Node { left, right, .. } => {
+                left.borrow().height() as i32 - right.borrow().height() as i32
+            }
+            AVLNode::Empty => 0,
+        }
+    }
 }

@@ -30,7 +30,7 @@ Rotates left
        parent.right = y
 */
 
-pub fn rotate_left(x: &Tree, root: &mut Tree) {
+pub fn rotate_left(x: &Tree, root: &mut Tree) -> Tree {
     println!("Rotate left with node: {:#?}", x);
     match &mut *x.borrow_mut() {
         AVLNode::Node { right, parent, .. } => {
@@ -84,8 +84,9 @@ pub fn rotate_left(x: &Tree, root: &mut Tree) {
                 }
                 _ => *root = y.clone(),
             };
+            y
         }
-        _ => (),
+        _ => Rc::new(RefCell::new(AVLNode::Empty)),
     }
 }
 
@@ -119,7 +120,7 @@ if parent.left == y:
 elif y.parent.right == y:
     parent.right = x
 */
-fn rotate_right(y: &Tree, root: &mut Tree) {
+pub fn rotate_right(y: &Tree, root: &mut Tree) -> Tree {
     println!("Rotate right with node: {:#?}", y);
     match &mut *y.borrow_mut() {
         AVLNode::Node { left, parent, .. } => {
@@ -174,11 +175,13 @@ fn rotate_right(y: &Tree, root: &mut Tree) {
                 }
                 _ => *root = x.clone(),
             };
+
+            x
         }
-        _ => (),
+        _ => Rc::new(RefCell::new(AVLNode::Empty)),
     }
 }
 
-fn insert_fixup() {
+pub fn insert_fixup() {
     todo!()
 }

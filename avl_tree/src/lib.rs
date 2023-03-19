@@ -43,7 +43,6 @@ pub enum AVLNode {
         right: Tree,
         parent: WeakTree,
         height: u32,
-        balance: i32,
     },
     Empty,
 }
