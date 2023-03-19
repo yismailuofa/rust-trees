@@ -30,7 +30,12 @@ Rotates left
    elif y.parent.right == x:
        parent.right = y
 */
+
+//10 (x)
+//    20 (y)
+//         30 (T3)
 pub fn rotate_left(x: &Tree, root: &mut Tree) {
+    println!("Rotate left with node: {:#?}", x);
     match &mut *x.borrow_mut() {
         RBNode::Node { right, parent, .. } => {
             let old_parent = match parent.upgrade() {
@@ -38,7 +43,7 @@ pub fn rotate_left(x: &Tree, root: &mut Tree) {
                 None => Rc::new(RefCell::new(RBNode::Empty)),
             }; // parent = x.parent
             let y = right.clone(); // y = x.right
-
+            *parent = Rc::downgrade(&y.clone());
             // T2 = y.left
             let t2 = match &*y.borrow() {
                 RBNode::Node { left, .. } => left.clone(),
@@ -119,6 +124,7 @@ elif y.parent.right == y:
     parent.right = x
 */
 fn rotate_right(y: &Tree, root: &mut Tree) {
+    println!("Rotate right with node: {:#?}", y);
     match &mut *y.borrow_mut() {
         RBNode::Node { left, parent, .. } => {
             let old_parent = match parent.upgrade() {
@@ -126,6 +132,7 @@ fn rotate_right(y: &Tree, root: &mut Tree) {
                 None => Rc::new(RefCell::new(RBNode::Empty)),
             }; // parent = y.parent
             let x = left.clone(); // x = y.left
+            *parent = Rc::downgrade(&x.clone());
 
             // T2 = x.right
             let t2 = match &*x.borrow() {
@@ -293,6 +300,8 @@ pub fn insert_fixup(x: Tree, root: &mut Tree) {
                     if Rc::ptr_eq(&curr, &parent_right) {
                         curr = parent.clone();
                         rotate_left(&parent, root);
+                        
+                        
                     }
                     match &mut *parent.borrow_mut() {
                         RBNode::Node { color, .. } => *color = Color::Black,
