@@ -82,7 +82,7 @@ impl TreeTrait for RBTree {
             right,
             parent,
             ..
-        } = &*curr.clone().borrow_mut()
+        } = &mut *curr.clone().borrow_mut()
         {
             match _key.cmp(key) {
                 std::cmp::Ordering::Less => {
@@ -109,7 +109,7 @@ impl TreeTrait for RBTree {
                     let mut left_node = left.borrow_mut();
                     let mut right_node = right.borrow_mut();
                     let old_parent = match parent.upgrade() {
-                        Some(_) => parent.upgrade().unwrap(),
+                        Some(rc) => rc,
                         None => Rc::new(RefCell::new(RBNode::Empty)),
                     };
 
@@ -270,6 +270,7 @@ impl TreeTrait for RBTree {
                                     }
                                     RBNode::Empty => {
                                         self.root = right.clone();
+                                        //println!("empty parent");
                                         *right_left = left.clone();
                                     },
                                 
@@ -313,8 +314,13 @@ impl TreeTrait for RBTree {
                                             
                                         //}
                                             
+                                        let mut successor_parent_mut = if Rc::ptr_eq(&successor_parent_strong, &right) {
+                                           right_node
+                                        } else{
+                                            successor_parent_strong.borrow_mut()
+                                        };
                                         
-                                        match &mut *successor_parent_strong.borrow_mut() {
+                                        match &mut *successor_parent_mut {
                                             RBNode::Node {
                                                 left: successor_parent_left,
                                                 right: successor_parent_right,

@@ -57,7 +57,7 @@ pub fn rotate_left(x: &Tree, root: &mut Tree) {
             // if t2:
             //     t2.parent = x
             match &mut *t2.borrow_mut() {
-                RBNode::Node { parent, .. } => *parent = Rc::downgrade(&x),
+                RBNode::Node { parent, .. } => *parent = Rc::downgrade(x),
                 _ => (),
             };
 
@@ -145,7 +145,7 @@ fn rotate_right(y: &Tree, root: &mut Tree) {
             // if t2:
             //     t2.parent = y
             match &mut *t2.borrow_mut() {
-                RBNode::Node { parent, .. } => *parent = Rc::downgrade(&y),
+                RBNode::Node { parent, .. } => *parent = Rc::downgrade(y),
                 _ => (),
             };
 
