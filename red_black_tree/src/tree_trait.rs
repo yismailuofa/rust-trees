@@ -129,7 +129,9 @@ impl TreeTrait for RBTree {
                                         *parent_right = Rc::new(RefCell::new(RBNode::Empty));
                                     }
                                 }
-                                _ => (),
+                                RBNode::Empty => {
+                                    self.root = Rc::new(RefCell::new(RBNode::Empty));
+                                },
                             };
                             return;
                         }
@@ -153,7 +155,9 @@ impl TreeTrait for RBTree {
                                         *parent_right = right.clone();
                                     }
                                 }
-                                _ => (),
+                                RBNode::Empty => {
+                                    self.root = right.clone();
+                                },
                             };
                             *right_parent = Rc::downgrade(&old_parent);
                             //curr.replace(RBNode::Empty);
@@ -179,7 +183,9 @@ impl TreeTrait for RBTree {
                                         *parent_right = left.clone();
                                     }
                                 }
-                                _ => (),
+                                RBNode::Empty => {
+                                    self.root = left.clone();
+                                },
                             };
 
                             *left_parent = Rc::downgrade(&old_parent);
@@ -194,53 +200,61 @@ impl TreeTrait for RBTree {
                                 ..
                             },
                             RBNode::Node {
-                                // left: right_left,
-                                // right: right_right,
-                                // parent: right_parent,
+                                left: right_left,
+                                right: right_right,
+                                parent: right_parent,
                                 ..
                             },
                         ) => {
                             //if node has two children, find the successor
-                            let mut successor = right.clone();
+                            // see if right_left is of type RBNode::Empty
+                            // if it is, then right is the successor
+                            // if it isn't, then find the leftmost node of right_left
+                            // that is the successor
 
-
-                            // while let RBNode::Node { left, .. } = &*successor.clone().borrow() {
-                            //     let left_node = left.borrow_mut();
-                            //     if let RBNode::Empty = left_node.clone() {
-                            //         break;
-                            //     } else {
-                            //         successor = left.clone();
-                            //     }
-                            // }
-
-                            // If this breaks use this LOL 🐤
-                            // turn the above while loop into a normal loop
-                            // and then use a break statement to break out of the loop
-                            // and then use the successor variable
-                            loop {
-                                match &*successor.clone().borrow() {
-                                    RBNode::Node { left, .. } => {
-                                        let left_node = left.borrow_mut();
-                                        if let RBNode::Empty = left_node.clone() {
-                                            break;
-                                        } else {
-                                            successor = left.clone();
-                                        }
+                            let successor = match &*right_left.borrow() {
+                                RBNode::Empty => {
+                                    right.clone()
+                                }
+                                _ => {
+                                    let mut successor_candidate = right_left.clone();
+                                    loop {
+                                        match &*successor_candidate.clone().borrow() {
+                                            RBNode::Node { left, .. } => {
+                                                let left_node = left.borrow();
+                                                if let RBNode::Empty = left_node.clone() {
+                                                    break;
+                                                } else {
+                                                    successor_candidate = left.clone();
+                                                }
+                                            }
+                                            _ => break,
+                                        };
                                     }
-                                    _ => break,
-                                };
-                            }
+                                    successor_candidate
+                                },
+                            };
+                            // let mut successor = right.clone();
+
+                            
+
+                            // loop {
+                            //     match &*successor.clone().borrow() {
+                            //         RBNode::Node { left, .. } => {
+                            //             let left_node = left.borrow();
+                            //             if let RBNode::Empty = left_node.clone() {
+                            //                 break;
+                            //             } else {
+                            //                 successor = left.clone();
+                            //             }
+                            //         }
+                            //         _ => break,
+                            //     };
+                            // }
 
 
                             //replace node with successor
-                            if let RBNode::Node {
-                                key: successor_key,
-                                color: successor_color,
-                                left: successor_left,
-                                right: successor_right,
-                                parent: successor_parent,
-                            } = &mut *successor.borrow_mut()
-                            {
+                            if Rc::ptr_eq(&successor, right) {
                                 match &mut *old_parent.borrow_mut() {
                                     RBNode::Node {
                                         left: parent_left,
@@ -248,48 +262,100 @@ impl TreeTrait for RBTree {
                                         ..
                                     } => {
                                         if Rc::ptr_eq(&parent_left, &curr) {
-                                            *parent_left = successor.clone();
+                                            *parent_left = right.clone();
                                         } else if Rc::ptr_eq(&parent_right, &curr) {
-                                            *parent_right = successor.clone();
+                                            *parent_right = right.clone();
                                         }
+
+                                        *right_left = left.clone();
+                                        
                                     }
-                                    _ => (),
-                                };
-                                *successor_left = left.clone();
-                                let successor_old_right = successor_right.clone();
-                                let successor_parent_strong = match successor_parent.upgrade() {
-                                    Some(_) => parent.upgrade().unwrap(),
-                                    None => Rc::new(RefCell::new(RBNode::Empty)),
-                                };
-                                match &mut *successor_parent_strong.borrow_mut() {
-                                    RBNode::Node {
-                                        left: successor_parent_left,
-                                        right: successor_parent_right,
-                                        ..
-                                    } => {
-                                        if Rc::ptr_eq(&successor_parent_left, &successor) {
-                                            *successor_parent_left = successor_right.clone();
-                                        } else if Rc::ptr_eq(&successor_parent_right, &successor) {
-                                            *successor_parent_right = successor_right.clone();
-                                        }
-                                    }
-                                    _ => (),
-                                };
-                                *successor_right = right.clone();
-                                match &mut *successor_old_right.borrow_mut() {
-                                    RBNode::Node {
-                                        parent: successor_old_right_parent,
-                                        ..
-                                    } => {
-                                        *successor_old_right_parent = Rc::downgrade(&successor_parent_strong);
-                                    }
-                                    _ => (),
-                                };
-                                    
+                                    RBNode::Empty => {
+                                        self.root = right.clone();
+                                        *right_left = left.clone();
+                                    },
                                 
-                                *successor_parent = Rc::downgrade(&old_parent);
-                                //curr.replace(RBNode::Empty);
+                                }
+                                return;
+                            } else{
+                                match &mut *successor.borrow_mut() {
+                                    RBNode::Node {
+                                        key: successor_key,
+                                        color: successor_color,
+                                        left: successor_left,
+                                        right: successor_right,
+                                        parent: successor_parent,
+                                    } => {
+                                        match &mut *old_parent.borrow_mut() {
+                                            RBNode::Node {
+                                                left: parent_left,
+                                                right: parent_right,
+                                                ..
+                                            } => {
+                                                if Rc::ptr_eq(&parent_left, &curr) {
+                                                    *parent_left = successor.clone();
+                                                } else if Rc::ptr_eq(&parent_right, &curr) {
+                                                    *parent_right = successor.clone();
+                                                }
+                                            }
+                                            _ => (),
+                                        };
+                                        *successor_left = left.clone();
+                                        let successor_old_right = successor_right.clone();
+                                        let successor_parent_strong = match successor_parent.upgrade() {
+                                            Some(_) => successor_parent.upgrade().unwrap(),
+                                            None => Rc::new(RefCell::new(RBNode::Empty)),
+                                        };
+    
+                                        // check if it is equal to any previously referenced nodes, and drop them if so
+                                        /*if Rc::ptr_eq(&successor_parent_strong, right) {
+                                            std::mem::drop(right_node)
+                                        } else if Rc::ptr_eq(&successor_parent_strong, right_left) {
+                                            std::mem::drop(right_left)
+                                        }*/ //else if Rc::ptr_eq(&successor_parent_strong, &curr) {
+                                            
+                                        //}
+                                            
+                                        
+                                        match &mut *successor_parent_strong.borrow_mut() {
+                                            RBNode::Node {
+                                                left: successor_parent_left,
+                                                right: successor_parent_right,
+                                                ..
+                                            } => {
+                                                if Rc::ptr_eq(&successor_parent_left, &successor) {
+                                                    *successor_parent_left = successor_right.clone();
+                                                } else if Rc::ptr_eq(&successor_parent_right, &successor) {
+                                                    *successor_parent_right = successor_right.clone();
+                                                }
+                                            }
+                                            _ => (),
+                                        };
+                                        *successor_right = right.clone();
+                                        match &mut *successor_old_right.borrow_mut() {
+                                            RBNode::Node {
+                                                parent: successor_old_right_parent,
+                                                ..
+                                            } => {
+                                                *successor_old_right_parent = Rc::downgrade(&successor_parent_strong);
+                                            }
+                                            _ => (),
+                                        };
+                                            
+                                        
+                                        *successor_parent = Rc::downgrade(&old_parent);
+                                    }
+                                    _ => (),
+                                }
+                                if Rc::ptr_eq(&self.root, &curr)  {
+                                    self.root = successor.clone();
+                                }
+                                return;
                             };
+                            
+                            //{
+                                //curr.replace(RBNode::Empty);
+                            //};
 
                             //delete successor
                             // if let RBNode::Node {

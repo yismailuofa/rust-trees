@@ -131,7 +131,7 @@ fn rotate_right(x: &Tree, root: &mut Tree) {
             let y = left.clone(); // y = x.left
 
             // T2 = y.right
-            let t2 = match &*y.borrow_mut() {
+            let t2 = match &*y.borrow() {
                 RBNode::Node { right, .. } => right.clone(),
                 RBNode::Empty => Rc::new(RefCell::new(RBNode::Empty)),
             };
