@@ -271,18 +271,19 @@ impl TreeTrait for RBTree {
                                         };
                                         *successor_left = left.clone();
                                         let successor_old_right = successor_right.clone();
-                                        let successor_parent_strong = match successor_parent.upgrade() {
-                                            Some(_) => successor_parent.upgrade().unwrap(),
-                                            None => Rc::new(RefCell::new(RBNode::Empty)),
-                                        };
-    
-                                                                                   
-                                        let mut successor_parent_mut = if Rc::ptr_eq(&successor_parent_strong, &right) {
-                                           right_node
-                                        } else{
-                                            successor_parent_strong.borrow_mut()
-                                        };
-                                        
+                                        let successor_parent_strong =
+                                            match successor_parent.upgrade() {
+                                                Some(_) => successor_parent.upgrade().unwrap(),
+                                                None => Rc::new(RefCell::new(RBNode::Empty)),
+                                            };
+
+                                        let mut successor_parent_mut =
+                                            if Rc::ptr_eq(&successor_parent_strong, &right) {
+                                                right_node
+                                            } else {
+                                                successor_parent_strong.borrow_mut()
+                                            };
+
                                         match &mut *successor_parent_mut {
                                             RBNode::Node {
                                                 left: successor_parent_left,
@@ -328,11 +329,6 @@ impl TreeTrait for RBTree {
                 }
             }
         }
-
-        //if node has no children, delete it
-
-        //if node has one child, replace it with the child
-        //if node has two children, replace it with the smallest node in the right subtree
     }
 
     fn count_leaves(&self) -> u32 {

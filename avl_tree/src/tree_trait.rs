@@ -4,7 +4,7 @@ use crate::{AVLNode, AVLTree};
 
 impl TreeTrait for AVLTree {
     fn insert_node(&mut self, _key: u32) {
-        todo!()
+        println!("Inserting node");
     }
 
     fn delete_node(&mut self, _key: u32) {
