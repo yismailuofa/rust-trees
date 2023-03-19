@@ -1,3 +1,4 @@
+mod avlnode;
 mod print;
 mod tree_ops_trait;
 mod tree_trait;
