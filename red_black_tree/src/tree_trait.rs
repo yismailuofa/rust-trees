@@ -1,5 +1,5 @@
 use std::{
-    cell::RefCell,
+    cell::{RefCell, Ref},
     rc::{Rc, Weak},
 };
 
@@ -71,6 +71,8 @@ impl TreeTrait for RBTree {
     }
 
     fn delete_node(&mut self, _key: u32) {
+        //delete node with key
+
         //find node with key
         let mut curr = self.root.clone();
 
@@ -80,7 +82,7 @@ impl TreeTrait for RBTree {
             right,
             parent,
             ..
-        } = &*curr.clone().borrow()
+        } = &*curr.clone().borrow_mut()
         {
             match _key.cmp(key) {
                 std::cmp::Ordering::Less => {
@@ -104,15 +106,15 @@ impl TreeTrait for RBTree {
                     }
                 }
                 std::cmp::Ordering::Equal => {
-                    // let mut left_node = left.borrow();
-                    // let mut right_node = right.borrow();
+                    let mut left_node = left.borrow_mut();
+                    let mut right_node = right.borrow_mut();
                     let old_parent = match parent.upgrade() {
                         Some(_) => parent.upgrade().unwrap(),
                         None => Rc::new(RefCell::new(RBNode::Empty)),
                     };
 
                     //if node has no children, delete it
-                    match (&*left.borrow(), &*right.borrow()) {
+                    match (&mut *left_node, &mut *right_node) {
                         (RBNode::Empty, RBNode::Empty) => {
                             //delete node
                             match &mut *old_parent.borrow_mut() {
@@ -134,7 +136,13 @@ impl TreeTrait for RBTree {
                             return;
                         }
                         // if a node has one child, replace it with the child
-                        (RBNode::Empty, RBNode::Node { .. }) => {
+                        (
+                            RBNode::Empty,
+                            RBNode::Node {
+                                parent: right_parent,
+                                ..
+                            },
+                        ) => {
                             match &mut *old_parent.borrow_mut() {
                                 RBNode::Node {
                                     left: parent_left,
@@ -151,10 +159,18 @@ impl TreeTrait for RBTree {
                                     self.root = right.clone();
                                 },
                             };
+                            *right_parent = Rc::downgrade(&old_parent);
+                            //curr.replace(RBNode::Empty);
 
                             return;
                         }
-                        (RBNode::Node { .. }, RBNode::Empty) => {
+                        (
+                            RBNode::Node {
+                                parent: left_parent,
+                                ..
+                            },
+                            RBNode::Empty,
+                        ) => {
                             match &mut *old_parent.borrow_mut() {
                                 RBNode::Node {
                                     left: parent_left,
@@ -172,15 +188,8 @@ impl TreeTrait for RBTree {
                                 },
                             };
 
-                            // reassign the left parent
-                            if let RBNode::Node {
-                                parent: left_parent,
-                                ..
-                            } = &mut *left.borrow_mut()
-                            {
-                                *left_parent = Rc::downgrade(&old_parent);
-                            }
-
+                            *left_parent = Rc::downgrade(&old_parent);
+                            //curr.replace(RBNode::Empty);
                             return;
                         }
                         (
@@ -242,6 +251,7 @@ impl TreeTrait for RBTree {
                             //         _ => break,
                             //     };
                             // }
+
 
                             //replace node with successor
                             if Rc::ptr_eq(&successor, right) {
