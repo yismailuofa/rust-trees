@@ -99,27 +99,73 @@ impl TreeTrait for AVLTree {
             }
 
             if balance > 1 {
-                match &mut *curr.clone().borrow_mut() {
-                    AVLNode::Node { key, left, .. } => {
+                let case = match &*curr.clone().borrow() {
+                    AVLNode::Node { key, .. } => {
                         if _key < *key {
-                            curr = rotate_right(&curr, &mut self.root);
+                            1
                         } else if _key > *key {
-                            *left = rotate_left(&left.clone(), &mut self.root);
-                            curr = rotate_right(&curr, &mut self.root);
+                            2
+                        } else {
+                            0
                         }
+                    }
+                    _ => 0,
+                };
+
+                // Avoids passing a borrow_mut() to rotate_right() and rotate_left()
+                // which would cause a double borrow_mut() error
+                match case {
+                    1 => curr = rotate_right(&curr, &mut self.root),
+                    2 => {
+                        let left = match &*curr.borrow() {
+                            AVLNode::Node { left, .. } => left.clone(),
+                            _ => Rc::new(RefCell::new(AVLNode::Empty)),
+                        };
+
+                        let left_node = rotate_left(&left.clone(), &mut self.root);
+
+                        match &mut *curr.clone().borrow_mut() {
+                            AVLNode::Node { left, .. } => *left = left_node,
+                            _ => (),
+                        }
+
+                        curr = rotate_right(&curr, &mut self.root);
                     }
                     _ => (),
                 }
             } else if balance < -1 {
-                match &mut *curr.clone().borrow_mut() {
-                    AVLNode::Node { key, right, .. } => {
-                        if _key > *key {
-                            curr = rotate_left(&curr, &mut self.root);
-                        } else if _key < *key {
-                            *right = rotate_right(&right.clone(), &mut self.root);
-                            curr = rotate_left(&curr, &mut self.root);
+                let case = match &*curr.clone().borrow() {
+                    AVLNode::Node { key, .. } => {
+                        if _key < *key {
+                            1
+                        } else if _key > *key {
+                            2
+                        } else {
+                            0
                         }
                     }
+                    _ => 0,
+                };
+
+                // Avoids passing a borrow_mut() to rotate_right() and rotate_left()
+                // which would cause a double borrow_mut() error
+                match case {
+                    1 => {
+                        let right = match &*curr.borrow() {
+                            AVLNode::Node { right, .. } => right.clone(),
+                            _ => Rc::new(RefCell::new(AVLNode::Empty)),
+                        };
+
+                        let right_node = rotate_right(&right.clone(), &mut self.root);
+
+                        match &mut *curr.clone().borrow_mut() {
+                            AVLNode::Node { right, .. } => *right = right_node,
+                            _ => (),
+                        }
+
+                        curr = rotate_left(&curr, &mut self.root);
+                    }
+                    2 => curr = rotate_left(&curr, &mut self.root),
                     _ => (),
                 }
             }

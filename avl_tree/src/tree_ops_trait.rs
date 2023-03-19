@@ -33,7 +33,13 @@ Rotates left
 pub fn rotate_left(x: &Tree, root: &mut Tree) -> Tree {
     println!("Rotate left with node: {:#?}", x);
     match &mut *x.borrow_mut() {
-        AVLNode::Node { right, parent, .. } => {
+        AVLNode::Node {
+            left,
+            right,
+            parent,
+            height,
+            ..
+        } => {
             let old_parent = match parent.upgrade() {
                 Some(_) => parent.upgrade().unwrap(),
                 None => Rc::new(RefCell::new(AVLNode::Empty)),
@@ -84,6 +90,19 @@ pub fn rotate_left(x: &Tree, root: &mut Tree) -> Tree {
                 }
                 _ => *root = y.clone(),
             };
+
+            // update height
+            *height = 1 + std::cmp::max(left.borrow().height(), right.borrow().height());
+
+            match &mut *y.borrow_mut() {
+                AVLNode::Node {
+                    height: y_height,
+                    right,
+                    ..
+                } => *y_height = 1 + std::cmp::max(*height, right.borrow().height()),
+                _ => (),
+            };
+
             y
         }
         _ => Rc::new(RefCell::new(AVLNode::Empty)),
@@ -123,7 +142,13 @@ elif y.parent.right == y:
 pub fn rotate_right(y: &Tree, root: &mut Tree) -> Tree {
     println!("Rotate right with node: {:#?}", y);
     match &mut *y.borrow_mut() {
-        AVLNode::Node { left, parent, .. } => {
+        AVLNode::Node {
+            left,
+            right,
+            parent,
+            height,
+            ..
+        } => {
             let old_parent = match parent.upgrade() {
                 Some(_) => parent.upgrade().unwrap(),
                 None => Rc::new(RefCell::new(AVLNode::Empty)),
@@ -174,6 +199,17 @@ pub fn rotate_right(y: &Tree, root: &mut Tree) -> Tree {
                     }
                 }
                 _ => *root = x.clone(),
+            };
+
+            *height = 1 + std::cmp::max(left.borrow().height(), right.borrow().height());
+
+            match &mut *x.borrow_mut() {
+                AVLNode::Node {
+                    height: x_height,
+                    left,
+                    ..
+                } => *x_height = 1 + std::cmp::max(left.borrow().height(), *height),
+                _ => (),
             };
 
             x
