@@ -100,15 +100,18 @@ impl TreeTrait for AVLTree {
 
             if balance > 1 {
                 let case = match &*curr.clone().borrow() {
-                    AVLNode::Node { key, .. } => {
-                        if _key < *key {
-                            1
-                        } else if _key > *key {
-                            2
-                        } else {
-                            0
+                    AVLNode::Node { left, .. } => match &*left.borrow() {
+                        AVLNode::Node { key: left_key, .. } => {
+                            if _key < *left_key {
+                                1
+                            } else if _key > *left_key {
+                                2
+                            } else {
+                                0
+                            }
                         }
-                    }
+                        _ => 0,
+                    },
                     _ => 0,
                 };
 
@@ -135,15 +138,18 @@ impl TreeTrait for AVLTree {
                 }
             } else if balance < -1 {
                 let case = match &*curr.clone().borrow() {
-                    AVLNode::Node { key, .. } => {
-                        if _key < *key {
-                            1
-                        } else if _key > *key {
-                            2
-                        } else {
-                            0
+                    AVLNode::Node { right, .. } => match &*right.borrow() {
+                        AVLNode::Node { key: right_key, .. } => {
+                            if _key < *right_key {
+                                1
+                            } else if _key > *right_key {
+                                2
+                            } else {
+                                0
+                            }
                         }
-                    }
+                        _ => 0,
+                    },
                     _ => 0,
                 };
 

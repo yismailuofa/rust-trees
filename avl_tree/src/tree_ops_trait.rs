@@ -31,7 +31,6 @@ Rotates left
 */
 
 pub fn rotate_left(x: &Tree, root: &mut Tree) -> Tree {
-    println!("Rotate left with node: {:#?}", x);
     match &mut *x.borrow_mut() {
         AVLNode::Node {
             left,
@@ -140,7 +139,6 @@ elif y.parent.right == y:
     parent.right = x
 */
 pub fn rotate_right(y: &Tree, root: &mut Tree) -> Tree {
-    println!("Rotate right with node: {:#?}", y);
     match &mut *y.borrow_mut() {
         AVLNode::Node {
             left,
