@@ -1,5 +1,5 @@
 use std::{
-    cell::{RefCell},
+    cell::RefCell,
     rc::{Rc, Weak},
 };
 
@@ -131,7 +131,7 @@ impl TreeTrait for RBTree {
                                 }
                                 RBNode::Empty => {
                                     self.root = Rc::new(RefCell::new(RBNode::Empty));
-                                },
+                                }
                             };
                             return;
                         }
@@ -157,10 +157,9 @@ impl TreeTrait for RBTree {
                                 }
                                 RBNode::Empty => {
                                     self.root = right.clone();
-                                },
+                                }
                             };
                             *right_parent = Rc::downgrade(&old_parent);
-                            //curr.replace(RBNode::Empty);
 
                             return;
                         }
@@ -185,23 +184,17 @@ impl TreeTrait for RBTree {
                                 }
                                 RBNode::Empty => {
                                     self.root = left.clone();
-                                },
+                                }
                             };
 
                             *left_parent = Rc::downgrade(&old_parent);
-                            //curr.replace(RBNode::Empty);
+
                             return;
                         }
                         (
+                            RBNode::Node { .. },
                             RBNode::Node {
-                                // left: left_left,
-                                // right: left_right,
-                                // parent: left_parent,
-                                ..
-                            },
-                            RBNode::Node {
-                                left: right_left,                                
-                                ..
+                                left: right_left, ..
                             },
                         ) => {
                             //if node has two children, find the successor
@@ -211,9 +204,7 @@ impl TreeTrait for RBTree {
                             // that is the successor
 
                             let successor = match &*right_left.borrow() {
-                                RBNode::Empty => {
-                                    right.clone()
-                                }
+                                RBNode::Empty => right.clone(),
                                 _ => {
                                     let mut successor_candidate = right_left.clone();
                                     loop {
@@ -230,26 +221,8 @@ impl TreeTrait for RBTree {
                                         };
                                     }
                                     successor_candidate
-                                },
+                                }
                             };
-                            // let mut successor = right.clone();
-
-                            
-
-                            // loop {
-                            //     match &*successor.clone().borrow() {
-                            //         RBNode::Node { left, .. } => {
-                            //             let left_node = left.borrow();
-                            //             if let RBNode::Empty = left_node.clone() {
-                            //                 break;
-                            //             } else {
-                            //                 successor = left.clone();
-                            //             }
-                            //         }
-                            //         _ => break,
-                            //     };
-                            // }
-
 
                             //replace node with successor
                             if Rc::ptr_eq(&successor, right) {
@@ -266,17 +239,15 @@ impl TreeTrait for RBTree {
                                         }
 
                                         *right_left = left.clone();
-                                        
                                     }
                                     RBNode::Empty => {
                                         self.root = right.clone();
                                         //println!("empty parent");
                                         *right_left = left.clone();
-                                    },
-                                
+                                    }
                                 }
                                 return;
-                            } else{
+                            } else {
                                 match &mut *successor.borrow_mut() {
                                     RBNode::Node {
                                         left: successor_left,
@@ -305,15 +276,7 @@ impl TreeTrait for RBTree {
                                             None => Rc::new(RefCell::new(RBNode::Empty)),
                                         };
     
-                                        // check if it is equal to any previously referenced nodes, and drop them if so
-                                        /*if Rc::ptr_eq(&successor_parent_strong, right) {
-                                            std::mem::drop(right_node)
-                                        } else if Rc::ptr_eq(&successor_parent_strong, right_left) {
-                                            std::mem::drop(right_left)
-                                        }*/ //else if Rc::ptr_eq(&successor_parent_strong, &curr) {
-                                            
-                                        //}
-                                            
+                                                                                   
                                         let mut successor_parent_mut = if Rc::ptr_eq(&successor_parent_strong, &right) {
                                            right_node
                                         } else{
@@ -327,9 +290,14 @@ impl TreeTrait for RBTree {
                                                 ..
                                             } => {
                                                 if Rc::ptr_eq(&successor_parent_left, &successor) {
-                                                    *successor_parent_left = successor_right.clone();
-                                                } else if Rc::ptr_eq(&successor_parent_right, &successor) {
-                                                    *successor_parent_right = successor_right.clone();
+                                                    *successor_parent_left =
+                                                        successor_right.clone();
+                                                } else if Rc::ptr_eq(
+                                                    &successor_parent_right,
+                                                    &successor,
+                                                ) {
+                                                    *successor_parent_right =
+                                                        successor_right.clone();
                                                 }
                                             }
                                             _ => (),
@@ -340,57 +308,21 @@ impl TreeTrait for RBTree {
                                                 parent: successor_old_right_parent,
                                                 ..
                                             } => {
-                                                *successor_old_right_parent = Rc::downgrade(&successor_parent_strong);
+                                                *successor_old_right_parent =
+                                                    Rc::downgrade(&successor_parent_strong);
                                             }
                                             _ => (),
                                         };
-                                            
-                                        
+
                                         *successor_parent = Rc::downgrade(&old_parent);
                                     }
                                     _ => (),
                                 }
-                                if Rc::ptr_eq(&self.root, &curr)  {
+                                if Rc::ptr_eq(&self.root, &curr) {
                                     self.root = successor.clone();
                                 }
                                 return;
                             };
-                            
-                            //{
-                                //curr.replace(RBNode::Empty);
-                            //};
-
-                            //delete successor
-                            // if let RBNode::Node {
-                            //     key: _,
-                            //     color: _,
-                            //     left: _,
-                            //     right: _,
-                            //     parent: parent,
-                            // } = &*successor.clone().borrow()
-                            // {
-                            //     if let Some(parent) = parent.upgrade() {
-                            //         if let RBNode::Node {
-                            //             key: _,
-                            //             color: _,
-                            //             left: left,
-                            //             right: _,
-                            //             parent: _,
-                            //         } = parent.borrow().clone()
-                            //         {
-                            //             if let RBNode::Node {
-                            //                 key: _,
-                            //                 color: _,
-                            //                 left: _,
-                            //                 right: _,
-                            //                 parent: _,
-                            //             } = left.borrow().clone()
-                            //             {
-                            //                 *left.borrow_mut() = RBNode::Empty;
-                            //             }
-                            //         }
-                            //     }
-                            // }
                         }
                     }
                 }

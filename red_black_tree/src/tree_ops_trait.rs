@@ -211,11 +211,6 @@ fn rotate_right(y: &Tree, root: &mut Tree) {
 pub fn insert_fixup(x: Tree, root: &mut Tree) {
     let mut curr = x;
 
-    // match &*curr.clone().borrow() {
-    //     RBNode::Node {
-    //         parent: node_parent,
-    //         ..
-    //     } => {
     loop {
         let node_parent = match &*curr.borrow() {
             RBNode::Node {
@@ -335,6 +330,4 @@ pub fn insert_fixup(x: Tree, root: &mut Tree) {
         RBNode::Node { color, .. } => *color = Color::Black,
         _ => (),
     };
-    // }
-    // _ => (),
 }
