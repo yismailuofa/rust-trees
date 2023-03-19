@@ -1,8 +1,8 @@
 use tree::TreeTrait;
 
-use crate::AVLNode;
+use crate::AVLTree;
 
-impl TreeTrait for AVLNode {
+impl TreeTrait for AVLTree {
     fn insert_node(&mut self, _key: u32) {
         todo!()
     }

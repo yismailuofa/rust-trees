@@ -1,8 +1,8 @@
-use avl_tree::*;
+use avl_tree::AVLTree;
 use tree::prompt_user;
 
 fn main() {
-    let mut tree = AVLNode::new();
+    let mut tree = AVLTree::default();
 
     loop {
         prompt_user(&mut tree);
