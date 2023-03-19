@@ -215,7 +215,3 @@ pub fn rotate_right(y: &Tree, root: &mut Tree) -> Tree {
         _ => Rc::new(RefCell::new(AVLNode::Empty)),
     }
 }
-
-pub fn insert_fixup() {
-    todo!()
-}
