@@ -75,12 +75,15 @@ impl TreeTrait for RBTree {
 
         //find node with key
         let mut curr = self.root.clone();
-
+        let mut x = Rc::new(RefCell::new(RBNode::Empty));
+        let mut old_color = Color::Black;
+        
         while let RBNode::Node {
             key,
             left,
             right,
             parent,
+            color,
             ..
         } = &mut *curr.clone().borrow_mut()
         {
@@ -112,7 +115,7 @@ impl TreeTrait for RBTree {
                         Some(rc) => rc,
                         None => Rc::new(RefCell::new(RBNode::Empty)),
                     };
-
+                     old_color = color.clone();
                     //if node has no children, delete it
                     match (&mut *left_node, &mut *right_node) {
                         (RBNode::Empty, RBNode::Empty) => {
@@ -160,8 +163,8 @@ impl TreeTrait for RBTree {
                                 }
                             };
                             *right_parent = Rc::downgrade(&old_parent);
-
-                            return;
+                            curr = right.clone();
+                            break;
                         }
                         (
                             RBNode::Node {
@@ -186,15 +189,15 @@ impl TreeTrait for RBTree {
                                     self.root = left.clone();
                                 }
                             };
-
+                            curr = left.clone();
                             *left_parent = Rc::downgrade(&old_parent);
 
-                            return;
+                            break;
                         }
                         (
                             RBNode::Node { .. },
                             RBNode::Node {
-                                left: right_left, ..
+                                left: right_left,right:right_right , color:right_color,..
                             },
                         ) => {
                             //if node has two children, find the successor
@@ -226,6 +229,11 @@ impl TreeTrait for RBTree {
 
                             //replace node with successor
                             if Rc::ptr_eq(&successor, right) {
+                                if Rc::ptr_eq(&self.root, &curr) {
+                                    self.root = successor.clone();
+                                }
+                                curr = right_right.clone();
+                                old_color = right_color.clone();
                                 match &mut *old_parent.borrow_mut() {
                                     RBNode::Node {
                                         left: parent_left,
@@ -246,16 +254,21 @@ impl TreeTrait for RBTree {
                                         *right_left = left.clone();
                                     }
                                 }
-                                curr = successor.clone();
-                                return;
+                                break;
                             } else {
                                 match &mut *successor.borrow_mut() {
                                     RBNode::Node {
                                         left: successor_left,
                                         right: successor_right,
                                         parent: successor_parent,
+                                        color: successor_color,
                                         ..
                                     } => {
+                                        if Rc::ptr_eq(&self.root, &curr) {
+                                            self.root = successor.clone();
+                                        }
+                                        curr = successor_right.clone();
+                                        old_color = successor_color.clone();
                                         match &mut *old_parent.borrow_mut() {
                                             RBNode::Node {
                                                 left: parent_left,
@@ -320,18 +333,20 @@ impl TreeTrait for RBTree {
                                     }
                                     _ => (),
                                 }
-                                if Rc::ptr_eq(&self.root, &curr) {
-                                    self.root = successor.clone();
-                                }
-                                curr = successor.clone();
-                                delete_fixup(curr, &mut self.root);
-                                return;
+                                //curr = successor.clone();
+                                
+                                break;
                             };
                         }
                     }
                 }
             }
         }
+        //println!("old color: {:?}", old_color);
+        if old_color == Color::Black {
+            delete_fixup(curr, &mut self.root);
+        }
+        //delete_fixup(curr, &mut self.root);
     }
 
     fn count_leaves(&self) -> u32 {
