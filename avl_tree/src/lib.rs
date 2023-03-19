@@ -1,3 +1,4 @@
+mod avlnode;
 mod print;
 mod tree_ops_trait;
 mod tree_trait;
@@ -42,7 +43,6 @@ pub enum AVLNode {
         right: Tree,
         parent: WeakTree,
         height: u32,
-        balance: i32,
     },
     Empty,
 }

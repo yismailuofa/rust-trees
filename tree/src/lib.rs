@@ -36,6 +36,8 @@ pub fn prompt_user(tree: &mut impl TreeTrait) {
             tree.insert_node(value);
 
             println!("Value inserted successfully");
+
+            tree.print_tree();
         }
         "2" => {
             println!("Enter the value of the node");
