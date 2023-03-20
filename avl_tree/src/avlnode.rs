@@ -5,10 +5,11 @@ use crate::AVLNode;
 impl AVLNode {
     pub fn count_leaves(&self) -> u32 {
         match self {
-            AVLNode::Node { left, right, .. } => {
-                left.borrow().count_leaves() + right.borrow().count_leaves()
-            }
-            AVLNode::Empty => 1,
+            AVLNode::Node { left, right, .. } => match (&*left.borrow(), &*right.borrow()) {
+                (AVLNode::Empty, AVLNode::Empty) => 1,
+                _ => left.borrow().count_leaves() + right.borrow().count_leaves(),
+            },
+            AVLNode::Empty => 0,
         }
     }
 

@@ -5,10 +5,11 @@ use crate::RBNode;
 impl RBNode {
     pub fn count_leaves(&self) -> u32 {
         match self {
-            RBNode::Node { left, right, .. } => {
-                left.borrow().count_leaves() + right.borrow().count_leaves()
-            }
-            RBNode::Empty => 1,
+            RBNode::Node { left, right, .. } => match (&*left.borrow(), &*right.borrow()) {
+                (RBNode::Empty, RBNode::Empty) => 1,
+                _ => left.borrow().count_leaves() + right.borrow().count_leaves(),
+            },
+            RBNode::Empty => 0,
         }
     }
 
