@@ -91,14 +91,14 @@ pub fn rotate_left(x: &Tree, root: &mut Tree) -> Tree {
             };
 
             // update height
-            *height = 1 + std::cmp::max(left.borrow().height(), right.borrow().height());
+            *height = 1 + std::cmp::max(left.borrow().height(false), right.borrow().height(false));
 
             match &mut *y.borrow_mut() {
                 AVLNode::Node {
                     height: y_height,
                     right,
                     ..
-                } => *y_height = 1 + std::cmp::max(*height, right.borrow().height()),
+                } => *y_height = 1 + std::cmp::max(*height, right.borrow().height(false)),
                 _ => (),
             };
 
@@ -199,14 +199,14 @@ pub fn rotate_right(y: &Tree, root: &mut Tree) -> Tree {
                 _ => *root = x.clone(),
             };
 
-            *height = 1 + std::cmp::max(left.borrow().height(), right.borrow().height());
+            *height = 1 + std::cmp::max(left.borrow().height(false), right.borrow().height(false));
 
             match &mut *x.borrow_mut() {
                 AVLNode::Node {
                     height: x_height,
                     left,
                     ..
-                } => *x_height = 1 + std::cmp::max(left.borrow().height(), *height),
+                } => *x_height = 1 + std::cmp::max(left.borrow().height(false), *height),
                 _ => (),
             };
 
@@ -216,15 +216,11 @@ pub fn rotate_right(y: &Tree, root: &mut Tree) -> Tree {
     }
 }
 
-
 pub fn find_node(root: &Tree, _key: u32) -> Option<Tree> {
     let mut curr = root.clone();
 
     while let AVLNode::Node {
-        key,
-        left,
-        right,
-        ..
+        key, left, right, ..
     } = &*curr.clone().borrow()
     {
         match _key.cmp(key) {
