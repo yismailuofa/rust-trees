@@ -1,14 +1,13 @@
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use red_black_tree::{tree_ops_trait::find_node, *};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use tree::TreeTrait;
 
 fn from_elem(c: &mut Criterion) {
-    let mut group = c.benchmark_group("RedBlack_Tree");
+    let mut group = c.benchmark_group("RB_Tree");
 
-    for size in [100, 400, 700, 1000, 1300].iter() {
-        // for size in [10000, 40000, 70000, 100000, 130000].iter() {
+    for size in [10000, 40000, 70000, 100000, 130000].iter() {
 
-        group.bench_with_input(BenchmarkId::new("RedBlack_Tree", size), size, |b, &size| {
+        group.bench_with_input(BenchmarkId::new("RB_Tree", size), size, |b, &size| {
             b.iter(|| {
                 let mut tree = RBTree::default();
 
