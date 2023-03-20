@@ -17,6 +17,7 @@ pub fn prompt_user(tree: &mut impl TreeTrait) {
         "Print In-order traversal of the tree",
         "Check if the tree is empty",
         "Print the tree",
+        "Quit",
     ];
 
     for (i, option) in options.iter().enumerate() {
@@ -63,6 +64,9 @@ pub fn prompt_user(tree: &mut impl TreeTrait) {
         }
         "7" => {
             tree.print_tree();
+        }
+        "8" => {
+            std::process::exit(0);
         }
         _ => {
             println!("Invalid option");
