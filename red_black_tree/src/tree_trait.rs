@@ -129,7 +129,9 @@ impl TreeTrait for RBTree {
             RBNode::Node { color, .. } => color.clone(),
             RBNode::Empty => panic!(), //should never happen
         };
-        let x;
+        let mut x=Rc::new(RefCell::new(RBNode::Empty));
+        let mut x_parent=Rc::new(RefCell::new(RBNode::Empty));
+        let mut end_flag = false;
         // case 1
         match &mut *z.borrow_mut() {
             RBNode::Node {
@@ -146,6 +148,7 @@ impl TreeTrait for RBTree {
                             Some(_) => z_parent.upgrade().unwrap(),
                             None => Rc::new(RefCell::new(RBNode::Empty)),
                         };
+                        x_parent = z_parent.clone();
                         let mut z_parent_node = z_parent.borrow_mut();
                         match &mut *z_parent_node {
                             RBNode::Node {
@@ -168,56 +171,62 @@ impl TreeTrait for RBTree {
                             }
                             RBNode::Empty => (),
                         }
-
-                        if y_orig_color == Color::Black {
-                            delete_fixup(x, &mut self.root);
-                        }
-                        return;
+                        end_flag = true;
+                        
                     }
                     _ => (),
                 }
-                match *z_right.borrow() {
-                    RBNode::Empty => {
-                        x = z_left.clone();
-                        //transplant(z, z.left)
-                        let z_parent = match z_parent.upgrade() {
-                            Some(_) => z_parent.upgrade().unwrap(),
-                            None => Rc::new(RefCell::new(RBNode::Empty)),
-                        };
-                        let mut z_parent_node = z_parent.borrow_mut();
-                        match &mut *z_parent_node {
-                            RBNode::Node {
-                                left: z_parent_left,
-                                right: z_parent_right,
-                                ..
-                            } => {
-                                if Rc::ptr_eq(&z_parent_left, &z) {
-                                    *z_parent_left = z_left.clone();
-                                } else {
-                                    *z_parent_right = z_left.clone();
+                if (!end_flag) {
+                    
+                
+                    match *z_right.borrow() {
+                        RBNode::Empty => {
+                            x = z_left.clone();
+                            //transplant(z, z.left)
+                            let z_parent = match z_parent.upgrade() {
+                                Some(_) => z_parent.upgrade().unwrap(),
+                                None => Rc::new(RefCell::new(RBNode::Empty)),
+                            };
+                            x_parent = z_parent.clone();
+                            let mut z_parent_node = z_parent.borrow_mut();
+                            match &mut *z_parent_node {
+                                RBNode::Node {
+                                    left: z_parent_left,
+                                    right: z_parent_right,
+                                    ..
+                                } => {
+                                    if Rc::ptr_eq(&z_parent_left, &z) {
+                                        *z_parent_left = z_left.clone();
+                                    } else {
+                                        *z_parent_right = z_left.clone();
+                                    }
                                 }
+                                RBNode::Empty => self.root = z_left.clone(),
                             }
-                            RBNode::Empty => self.root = z_left.clone(),
-                        }
-                        // z.left.parent = z.parent
-                        match &mut *z_left.borrow_mut() {
-                            RBNode::Node { parent, .. } => {
-                                *parent = Rc::downgrade(&z_parent);
+                            // z.left.parent = z.parent
+                            match &mut *z_left.borrow_mut() {
+                                RBNode::Node { parent, .. } => {
+                                    *parent = Rc::downgrade(&z_parent);
+                                }
+                                RBNode::Empty => (),
                             }
-                            RBNode::Empty => (),
-                        }
 
-                        if y_orig_color == Color::Black {
-                            delete_fixup(x, &mut self.root);
+                            end_flag = true;
                         }
-                        return;
+                        _ => (),
                     }
-                    _ => (),
+                
                 }
             }
 
             RBNode::Empty => panic!(), //should never happen
         };
+        if (end_flag) {
+            if y_orig_color == Color::Black {
+                delete_fixup(x, &mut self.root, &x_parent);
+            }
+            return;
+        }
 
         // case 3
         // y = self.minimum(z.right)
@@ -254,7 +263,7 @@ impl TreeTrait for RBTree {
         // if y.p == z:
         //     x.p = y
         let mut flag = false;
-        let mut case_3_flag = false;
+        // let mut case_3_flag = false;
         match &mut *y.borrow_mut() {
             RBNode::Node {
                 parent: y_parent,
@@ -272,8 +281,10 @@ impl TreeTrait for RBTree {
                         }
                         RBNode::Empty => (),
                     }
+                    x_parent = y.clone();
                 } else {
                     // transplant(y, y.right)
+                    x_parent = y_parent.clone();
                     let mut y_parent_node = y_parent.borrow_mut();
                     match &mut *y_parent_node {
                         RBNode::Node {
@@ -378,43 +389,43 @@ impl TreeTrait for RBTree {
                 }
 
                 // We need to to handle the case where x is empty
-                match &*x.borrow() {
-                    RBNode::Empty => case_3_flag = true,
-                    _ => (),
-                }
+                // match &*x.borrow() {
+                //     RBNode::Empty => case_3_flag = true,
+                //     _ => (),
+                // }
             }
 
             RBNode::Empty => panic!(), //should never happen
         };
 
-        if case_3_flag {
-            // rotate left on y.left
-            // match &*y.borrow() {
-            //     RBNode::Node { left, .. } => rotate_left(&left, &mut self.root),
-            //     _ => (),
-            // };
-            let left = match &*y.borrow() {
-                RBNode::Node { left, .. } => left.clone(),
-                _ => Rc::new(RefCell::new(RBNode::Empty)),
-            };
+        // if case_3_flag {
+        //     // rotate left on y.left
+        //     // match &*y.borrow() {
+        //     //     RBNode::Node { left, .. } => rotate_left(&left, &mut self.root),
+        //     //     _ => (),
+        //     // };
+        //     let left = match &*y.borrow() {
+        //         RBNode::Node { left, .. } => left.clone(),
+        //         _ => Rc::new(RefCell::new(RBNode::Empty)),
+        //     };
 
-            rotate_left(&left, &mut self.root);
+        //     rotate_left(&left, &mut self.root);
 
-            rotate_right(&y, &mut self.root);
+        //     rotate_right(&y, &mut self.root);
 
-            // set root color to black
-            match &mut *self.root.borrow_mut() {
-                RBNode::Node { color, .. } => {
-                    *color = Color::Black;
-                }
-                RBNode::Empty => (),
-            }
+        //     // set root color to black
+        //     match &mut *self.root.borrow_mut() {
+        //         RBNode::Node { color, .. } => {
+        //             *color = Color::Black;
+        //         }
+        //         RBNode::Empty => (),
+        //     }
 
-            return;
-        }
+        //     return;
+        // }
 
         if y_orig_color == Color::Black {
-            delete_fixup(x, &mut self.root);
+            delete_fixup(x, &mut self.root, &x_parent);
         }
     }
 
