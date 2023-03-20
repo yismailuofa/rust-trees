@@ -1,6 +1,6 @@
 mod print;
 mod rbnode;
-mod tree_ops_trait;
+pub mod tree_ops_trait;
 mod tree_trait;
 
 use std::{
@@ -11,7 +11,7 @@ use std::{
 use tree::TreeTrait;
 
 pub struct RBTree {
-    root: Tree,
+    pub root: Tree,
 }
 
 impl Default for RBTree {

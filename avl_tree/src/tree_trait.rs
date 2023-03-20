@@ -290,14 +290,17 @@ impl TreeTrait for AVLTree {
         let mut parent = match &*curr.borrow() {
             AVLNode::Node { parent, .. } => match parent.upgrade() {
                 Some(parent) => parent,
-                None => return,
+                _ => Rc::new(RefCell::new(AVLNode::Empty)),
             },
             _ => Rc::new(RefCell::new(AVLNode::Empty)),
         };
 
         let mut flag = false;
         let mut child = Rc::new(RefCell::new(AVLNode::Empty));
-        if let AVLNode::Node { left, right, .. } = &mut *curr.borrow_mut() {
+        if let AVLNode::Node {
+            left, right, key, ..
+        } = &mut *curr.borrow_mut()
+        {
             let left_empty = match &*left.borrow() {
                 AVLNode::Empty => true,
                 _ => false,
@@ -332,28 +335,25 @@ impl TreeTrait for AVLTree {
                 let mut successor_parent = curr.clone();
 
                 while let AVLNode::Node { left, .. } = &*successor.clone().borrow() {
+                    if let AVLNode::Empty = &*left.borrow() {
+                        break;
+                    }
+
                     successor_parent = successor.clone();
                     successor = left.clone();
                 }
 
-                if let AVLNode::Node { key, .. } = &*successor.borrow() {
-                    match &mut *curr.borrow_mut() {
-                        AVLNode::Node { key: curr_key, .. } => *curr_key = *key,
-                        _ => (),
-                    }
+                println!("Successor: {:#?}", successor.borrow());
+
+                if let AVLNode::Node { key: suc_key, .. } = &*successor.borrow() {
+                    *key = *suc_key;
                 }
 
-                if let AVLNode::Node { left, .. } = &*successor_parent.borrow() {
+                if let AVLNode::Node { left, .. } = &mut *successor_parent.borrow_mut() {
                     if Rc::ptr_eq(&successor, left) {
-                        match &mut *successor_parent.borrow_mut() {
-                            AVLNode::Node { left, .. } => *left = right.clone(),
-                            _ => (),
-                        }
+                        *left = right.clone()
                     } else {
-                        match &mut *successor_parent.borrow_mut() {
-                            AVLNode::Node { right, .. } => *right = right.clone(),
-                            _ => (),
-                        }
+                        *right = right.clone()
                     }
                 };
             }
@@ -449,6 +449,7 @@ impl TreeTrait for AVLTree {
             }
 
             parent = curr.clone();
+            let _ = parent; // Just to satisfy Ferris 🦀
             curr = match &*curr.clone().borrow() {
                 AVLNode::Node { parent, .. } => match parent.upgrade() {
                     Some(parent) => parent,
