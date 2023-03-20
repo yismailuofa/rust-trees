@@ -361,12 +361,36 @@ impl TreeTrait for AVLTree {
                 if Rc::ptr_eq(&curr, &successor_parent) {
                     if Rc::ptr_eq(&successor, right) {
                         *right = match &*successor.borrow() {
-                            AVLNode::Node { right, .. } => right.clone(),
+                            AVLNode::Node { right, .. } => {
+                                match &mut *right.borrow_mut() {
+                                    AVLNode::Node {
+                                        parent: node_parent,
+                                        ..
+                                    } => {
+                                        *node_parent = Rc::downgrade(&successor_parent.clone());
+                                    }
+                                    _ => (),
+                                }
+
+                                right.clone()
+                            }
                             _ => Rc::new(RefCell::new(AVLNode::Empty)),
                         };
                     } else {
                         *left = match &*successor.borrow() {
-                            AVLNode::Node { right, .. } => right.clone(),
+                            AVLNode::Node { right, .. } => {
+                                match &mut *right.borrow_mut() {
+                                    AVLNode::Node {
+                                        parent: node_parent,
+                                        ..
+                                    } => {
+                                        *node_parent = Rc::downgrade(&successor_parent.clone());
+                                    }
+                                    _ => (),
+                                }
+
+                                right.clone()
+                            }
                             _ => Rc::new(RefCell::new(AVLNode::Empty)),
                         };
                     }

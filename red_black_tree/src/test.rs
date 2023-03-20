@@ -23,9 +23,12 @@ fn monkey_test() {
     vec.shuffle(&mut rng);
 
     // delete n-1 nodes
+    let mut counter = 1000;
     for i in &vec[0..vec.len() - 1] {
         tree.delete_node(*i);
-    }
 
-    assert_eq!(tree.in_order().len(), 1);
+        counter -= 1;
+
+        assert_eq!(tree.in_order().len(), counter);
+    }
 }

@@ -31,8 +31,19 @@ impl AVLNode {
     pub fn in_order(&self) -> Vec<u32> {
         match self {
             AVLNode::Node {
-                key, left, right, ..
+                key,
+                left,
+                right,
+                parent,
+                ..
             } => {
+                match parent.upgrade() {
+                    None => {
+                        println!("Parent is None for {}", key);
+                    }
+                    _ => (),
+                }
+
                 let mut vec = left.borrow().in_order();
                 vec.push(*key);
                 vec.extend(right.borrow().in_order());

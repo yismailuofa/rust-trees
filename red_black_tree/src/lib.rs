@@ -11,24 +11,15 @@ use std::{
     rc::{Rc, Weak},
 };
 
-use tree::TreeTrait;
-
 pub struct RBTree {
     pub root: Tree,
 }
 
 impl Default for RBTree {
     fn default() -> Self {
-        let mut tree = RBTree {
+        let tree = RBTree {
             root: Rc::new(RefCell::new(RBNode::Empty)),
         };
-
-        tree.insert_node(20);
-        tree.insert_node(40);
-        tree.insert_node(10);
-        tree.insert_node(15);
-        // tree.insert_node(30);
-        // tree.insert_node(35);
 
         tree
     }

@@ -93,36 +93,34 @@ pub fn rotate_left(x: &Tree, root: &mut Tree) {
     }
 }
 
-/**
-Rotates right
-Ex:
+// Rotates right
+// Ex:
 
-         y                               x
-        / \     Right Rotation          /  \
-       x   T3   - - - - - - - >        T1   y
-      / \                                  / \
-     T1  T2                              T2  T3
-# Rotation
-parent = y.parent
+//          y                               x
+//         / \     Right Rotation          /  \
+//        x   T3   - - - - - - - >        T1   y
+//       / \                                  / \
+//      T1  T2                              T2  T3
+// # Rotation
+// parent = y.parent
 
-x = y.left
-T2 = x.right
+// x = y.left
+// T2 = x.right
 
-x.right = y
-y.left = T2
+// x.right = y
+// y.left = T2
 
-if T2:
-    T2.parent = y
-x.parent = parent
+// if T2:
+//     T2.parent = y
+// x.parent = parent
 
+// if parent is None:
+//     self.root = x
+// if parent.left == y:
+//     parent.left = x
+// elif y.parent.right == y:
+//     parent.right = x
 
-if parent is None:
-    self.root = x
-if parent.left == y:
-    parent.left = x
-elif y.parent.right == y:
-    parent.right = x
-*/
 pub fn rotate_right(y: &Tree, root: &mut Tree) {
     //println!("Rotate right with node: {:#?}", y);
     match &mut *y.borrow_mut() {
