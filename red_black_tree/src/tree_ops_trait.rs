@@ -383,8 +383,8 @@ pub fn insert_fixup(x: Tree, root: &mut Tree) {
 //             w = x.p.right
 //         # type 2
 //         if w.left.color == BLACK and w.right.color == BLACK:
-//             w.color = RED 
-//             x = x.p 
+//             w.color = RED
+//             x = x.p
 //         else:
 //             # type 3
 //             if w.right.color == BLACK:
@@ -393,9 +393,9 @@ pub fn insert_fixup(x: Tree, root: &mut Tree) {
 //                 self.right_rotate(w)
 //                 w = x.p.right
 //             # type 4
-//             w.color = x.p.color 
-//             x.p.color = BLACK 
-//             w.right.color = BLACK 
+//             w.color = x.p.color
+//             x.p.color = BLACK
+//             w.right.color = BLACK
 //             self.left_rotate(x.p)
 //             x = self.root
 //     else:
@@ -408,8 +408,8 @@ pub fn insert_fixup(x: Tree, root: &mut Tree) {
 //             w = x.p.left
 //         # type 2
 //         if w.right.color == BLACK and w.left.color == BLACK:
-//             w.color = RED 
-//             x = x.p 
+//             w.color = RED
+//             x = x.p
 //         else:
 //             # type 3
 //             if w.left.color == BLACK:
@@ -418,9 +418,9 @@ pub fn insert_fixup(x: Tree, root: &mut Tree) {
 //                 self.left_rotate(w)
 //                 w = x.p.left
 //             # type 4
-//             w.color = x.p.color 
-//             x.p.color = BLACK 
-//             w.left.color = BLACK 
+//             w.color = x.p.color
+//             x.p.color = BLACK
+//             w.left.color = BLACK
 //             self.right_rotate(x.p)
 //             x = self.root
 // x.color = BLACK
@@ -430,10 +430,7 @@ pub fn find_node(root: &Tree, _key: u32) -> Option<Tree> {
     let mut curr = root.clone();
 
     while let RBNode::Node {
-        key,
-        left,
-        right,
-        ..
+        key, left, right, ..
     } = &*curr.clone().borrow()
     {
         match _key.cmp(key) {
@@ -465,7 +462,6 @@ pub fn find_node(root: &Tree, _key: u32) -> Option<Tree> {
     None
 }
 
-
 pub fn delete_fixup(x: Tree, root: &mut Tree) {
     let mut curr = x;
 
@@ -483,7 +479,7 @@ pub fn delete_fixup(x: Tree, root: &mut Tree) {
                     break;
                 }
                 node_parent.clone()
-            },
+            }
             _ => break,
         };
 
@@ -496,8 +492,7 @@ pub fn delete_fixup(x: Tree, root: &mut Tree) {
             RBNode::Node { left, .. } => left.clone(),
             _ => Rc::new(RefCell::new(RBNode::Empty)),
         };
-            
-        
+
         if Rc::ptr_eq(&curr, &curr_parent_left) {
             let mut w = match &*curr_parent.borrow() {
                 RBNode::Node { right, .. } => right.clone(),
@@ -513,7 +508,7 @@ pub fn delete_fixup(x: Tree, root: &mut Tree) {
                         _ => (),
                     };
                     rotate_left(&curr_parent, root);
-                    flag=true;
+                    flag = true;
                 }
                 _ => (),
             };
@@ -523,8 +518,7 @@ pub fn delete_fixup(x: Tree, root: &mut Tree) {
                     _ => w,
                 };
             }
-            
-            
+
             // type 2
             flag = false;
             match &mut *w.borrow_mut() {
@@ -535,17 +529,34 @@ pub fn delete_fixup(x: Tree, root: &mut Tree) {
                     ..
                 } => {
                     match (&*w_left.borrow(), &*w_right.borrow()) {
-                        (RBNode::Node{color: w_left_color, ..}, RBNode::Node{color:w_right_color, ..}) if w_left_color==&Color::Black && w_right_color==&Color::Black => {
+                        (
+                            RBNode::Node {
+                                color: w_left_color,
+                                ..
+                            },
+                            RBNode::Node {
+                                color: w_right_color,
+                                ..
+                            },
+                        ) if w_left_color == &Color::Black && w_right_color == &Color::Black => {
                             *w_color = Color::Red;
                             curr = curr_parent.clone();
                             continue;
                         }
                         _ => (),
                         //type 3
-                        
                     };
-                    match  (&mut *w_left.borrow_mut(), &*w_right.borrow()){
-                        (RBNode::Node{color: w_left_color, ..}, RBNode::Node{color:w_right_color, ..}) => {
+                    match (&mut *w_left.borrow_mut(), &*w_right.borrow()) {
+                        (
+                            RBNode::Node {
+                                color: w_left_color,
+                                ..
+                            },
+                            RBNode::Node {
+                                color: w_right_color,
+                                ..
+                            },
+                        ) => {
                             if w_right_color == &Color::Black {
                                 *w_left_color = Color::Black;
                                 /*match &mut *w_left.borrow_mut() {
@@ -556,8 +567,7 @@ pub fn delete_fixup(x: Tree, root: &mut Tree) {
                                 rotate_right(&w, root);
                                 flag = true;
                             }
-                            
-                        },
+                        }
                         _ => (),
                     }
                 }
@@ -571,8 +581,11 @@ pub fn delete_fixup(x: Tree, root: &mut Tree) {
             }
             //type 4
             match &mut *w.borrow_mut() {
-                RBNode::Node { color:w_color, .. } => match &*curr_parent.borrow() {
-                    RBNode::Node { color:parent_color, .. } => *w_color = *parent_color,
+                RBNode::Node { color: w_color, .. } => match &*curr_parent.borrow() {
+                    RBNode::Node {
+                        color: parent_color,
+                        ..
+                    } => *w_color = *parent_color,
                     _ => (),
                 },
                 _ => (),
@@ -590,8 +603,7 @@ pub fn delete_fixup(x: Tree, root: &mut Tree) {
             };
             rotate_left(&curr_parent, root);
             curr = root.clone();
-        }
-        else {
+        } else {
             let mut w = match &*curr_parent.borrow() {
                 RBNode::Node { left, .. } => left.clone(),
                 _ => break,
@@ -606,14 +618,16 @@ pub fn delete_fixup(x: Tree, root: &mut Tree) {
                         _ => (),
                     };
                     rotate_right(&curr_parent, root);
-                    flag=true;
+                    flag = true;
                 }
                 _ => (),
             };
-            if flag {w = match &*curr_parent.borrow() {
-                RBNode::Node { left, .. } => left.clone(),
-                _ => w,
-            };}
+            if flag {
+                w = match &*curr_parent.borrow() {
+                    RBNode::Node { left, .. } => left.clone(),
+                    _ => w,
+                };
+            }
             flag = false;
             // type 2
             match &mut *w.borrow_mut() {
@@ -624,7 +638,16 @@ pub fn delete_fixup(x: Tree, root: &mut Tree) {
                     ..
                 } => {
                     match (&*w_left.borrow(), &*w_right.borrow()) {
-                        (RBNode::Node{color: w_left_color, ..}, RBNode::Node{color:w_right_color, ..}) if w_left_color==&Color::Black && w_right_color==&Color::Black => {
+                        (
+                            RBNode::Node {
+                                color: w_left_color,
+                                ..
+                            },
+                            RBNode::Node {
+                                color: w_right_color,
+                                ..
+                            },
+                        ) if w_left_color == &Color::Black && w_right_color == &Color::Black => {
                             *w_color = Color::Red;
                             curr = curr_parent.clone();
                             continue;
@@ -633,7 +656,16 @@ pub fn delete_fixup(x: Tree, root: &mut Tree) {
                         //type 3
                     }
                     match (&mut *w_left.borrow_mut(), &mut *w_right.borrow_mut()) {
-                        (RBNode::Node{color: w_left_color, ..}, RBNode::Node{color:w_right_color, ..}) => {
+                        (
+                            RBNode::Node {
+                                color: w_left_color,
+                                ..
+                            },
+                            RBNode::Node {
+                                color: w_right_color,
+                                ..
+                            },
+                        ) => {
                             if w_left_color == &Color::Black {
                                 *w_right_color = Color::Black;
                                 *w_color = Color::Red;
@@ -646,14 +678,20 @@ pub fn delete_fixup(x: Tree, root: &mut Tree) {
                 }
                 _ => (),
             };
-            if flag {w = match &*curr_parent.borrow() {
-                RBNode::Node { left, .. } => left.clone(),
-                _ => break,
-            };}
+            if flag {
+                w = match &*curr_parent.borrow() {
+                    RBNode::Node { left, .. } => left.clone(),
+                    _ => break,
+                };
+            }
             match &mut *w.borrow_mut() {
-                RBNode::Node { color:w_color, left:w_left, .. } => {
+                RBNode::Node {
+                    color: w_color,
+                    left: w_left,
+                    ..
+                } => {
                     //type 4
-                    
+
                     match &*curr_parent.borrow() {
                         RBNode::Node { color, .. } => *w_color = *color,
                         _ => (),
@@ -663,17 +701,17 @@ pub fn delete_fixup(x: Tree, root: &mut Tree) {
                         _ => (),
                     };
                     match &mut *w_left.borrow_mut() {
-                            RBNode::Node { color, .. } => *color = Color::Black,
-                            _ => (),
+                        RBNode::Node { color, .. } => *color = Color::Black,
+                        _ => (),
                     }
                     rotate_right(&curr_parent, root);
                     curr = root.clone();
-                },
+                }
                 _ => (),
             };
         }
     }
-                
+
     match &mut *curr.borrow_mut() {
         RBNode::Node { color, .. } => *color = Color::Black,
         _ => (),
