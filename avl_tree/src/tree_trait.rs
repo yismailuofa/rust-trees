@@ -199,67 +199,7 @@ impl TreeTrait for AVLTree {
             }
         }
     }
-    // def delete(self, root, key):
-    //     if not root:
-    //         return root
 
-    //     parent = None
-    //     curr = root
-    //     while curr and curr.val != key:
-    //         parent = curr
-    //         if key < curr.val:
-    //             curr = curr.left
-    //         else:
-    //             curr = curr.right
-
-    //     if not curr:
-    //         return root
-
-    //     if not curr.left or not curr.right:
-    //         child = curr.left or curr.right
-    //         if not parent:
-    //             root = child
-    //         elif parent.left == curr:
-    //             parent.left = child
-    //         else:
-    //             parent.right = child
-    //     else:
-    //         successor = curr.right
-    //         successor_parent = curr
-    //         while successor.left:
-    //             successor_parent = successor
-    //             successor = successor.left
-
-    //         curr.val = successor.val
-    //         if successor_parent.left == successor:
-    //             successor_parent.left = successor.right
-    //         else:
-    //             successor_parent.right = successor.right
-
-    //     curr = parent
-    //     while curr:
-    //         curr.height = 1 + max(self.getHeight(curr.left), self.getHeight(curr.right))
-    //         balance = self.getBalance(curr)
-
-    //         if balance > 1 and self.getBalance(curr.left) >= 0:
-    //             curr = self.rightRotate(curr)
-    //             break
-    //         elif balance < -1 and self.getBalance(curr.right) <= 0:
-    //             curr = self.leftRotate(curr)
-    //             break
-    //         elif balance > 1 and self.getBalance(curr.left) < 0:
-    //             curr.left = self.leftRotate(curr.left)
-    //             curr = self.rightRotate(curr)
-    //             break
-    //         elif balance < -1 and self.getBalance(curr.right) > 0:
-    //             curr.right = self.rightRotate(curr.right)
-    //             curr = self.leftRotate(curr)
-    //             break
-
-    //         parent = curr
-    //         curr = curr.parent
-
-    //     return root
     fn delete_node(&mut self, _key: u32) {
         if let AVLNode::Empty = &*self.root.borrow() {
             return;

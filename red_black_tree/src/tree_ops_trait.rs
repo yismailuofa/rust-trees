@@ -14,24 +14,6 @@ Rotates left
       / \       < - - - - - - -            / \
      T1  T2     Left Rotation            T2  T3
 
-   # Rotation
-   parent = x.parent
-   y = x.right
-   T2 = y.left
-
-   y.left = x
-   x.right = T2
-
-   if T2:
-       T2.parent = x
-   y.parent = parent
-
-   if parent is None:
-       self.root = y
-   elif parent.left == x:
-       parent.left = y
-   elif y.parent.right == x:
-       parent.right = y
 */
 
 pub fn rotate_left(x: &Tree, root: &mut Tree) {
@@ -101,25 +83,6 @@ pub fn rotate_left(x: &Tree, root: &mut Tree) {
 //        x   T3   - - - - - - - >        T1   y
 //       / \                                  / \
 //      T1  T2                              T2  T3
-// # Rotation
-// parent = y.parent
-
-// x = y.left
-// T2 = x.right
-
-// x.right = y
-// y.left = T2
-
-// if T2:
-//     T2.parent = y
-// x.parent = parent
-
-// if parent is None:
-//     self.root = x
-// if parent.left == y:
-//     parent.left = x
-// elif y.parent.right == y:
-//     parent.right = x
 
 pub fn rotate_right(y: &Tree, root: &mut Tree) {
     //println!("Rotate right with node: {:#?}", y);
@@ -180,39 +143,7 @@ pub fn rotate_right(y: &Tree, root: &mut Tree) {
         _ => (),
     }
 }
-// def insert_fixup(self, z):
-//     while z.p and z.p.color == RED:
-//         if z.p == z.p.p.left:
-//             y = z.p.p.right
-//             if y.color == RED:
-//                 z.p.color = BLACK
-//                 y.color = BLACK
-//                 z.p.p.color = RED
-//                 z = z.p.p
-//             else:
-//                 if z == z.p.right:
-//                     z = z.p
-//                     self.left_rotate(z)
-//                 z.p.color = BLACK
-//                 z.p.p.color = RED
-//                 self.right_rotate(z.p.p)
-//         else:
-//             y = z.p.p.left
-//             if y.color == RED:
-//                 z.p.color = BLACK
-//                 y.color = BLACK
-//                 z.p.p.color = RED
-//                 z = z.p.p
-//             else:
-//                 if z == z.p.left:
-//                     z = z.p
-//                     self.right_rotate(z)
-//                 z.p.color = BLACK
-//                 z.p.p.color = RED
-//                 self.left_rotate(z.p.p)
-//         if z == self.root:
-//             break
-//     self.root.color = BLACK
+
 pub fn insert_fixup(x: Tree, root: &mut Tree) {
     let mut curr = x;
 
@@ -372,60 +303,6 @@ pub fn insert_fixup(x: Tree, root: &mut Tree) {
         _ => (),
     };
 }
-
-// def delete_fixup(self, x): x -> curr5
-// while x != self.root and x.color == BLACK:
-//     if x == x.p.left:
-//         w = x.p.right
-//         # type 1
-//         if w.color == RED:
-//             w.color = BLACK
-//             x.p.color = RED
-//             self.left_rotate(x.p)
-//             w = x.p.right
-//         # type 2
-//         if w.left.color == BLACK and w.right.color == BLACK:
-//             w.color = RED
-//             x = x.p
-//         else:
-//             # type 3
-//             if w.right.color == BLACK:
-//                 w.left.color = BLACK
-//                 w.color = RED
-//                 self.right_rotate(w)
-//                 w = x.p.right
-//             # type 4
-//             w.color = x.p.color
-//             x.p.color = BLACK
-//             w.right.color = BLACK
-//             self.left_rotate(x.p)
-//             x = self.root
-//     else:
-//         w = x.p.left
-//         # type 1
-//         if w.color == RED:
-//             w.color = BLACK
-//             x.p.color = RED
-//             self.right_rotate(x.p)
-//             w = x.p.left
-//         # type 2
-//         if w.right.color == BLACK and w.left.color == BLACK:
-//             w.color = RED
-//             x = x.p
-//         else:
-//             # type 3
-//             if w.left.color == BLACK:
-//                 w.right.color = BLACK
-//                 w.color = RED
-//                 self.left_rotate(w)
-//                 w = x.p.left
-//             # type 4
-//             w.color = x.p.color
-//             x.p.color = BLACK
-//             w.left.color = BLACK
-//             self.right_rotate(x.p)
-//             x = self.root
-// x.color = BLACK
 
 // delete fixup based on and above python code
 pub fn find_node(root: &Tree, _key: u32) -> Option<Tree> {
