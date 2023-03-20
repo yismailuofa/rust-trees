@@ -324,11 +324,9 @@ pub fn insert_fixup(x: Tree, root: &mut Tree) {
                         RBNode::Node { color, .. } => *color = Color::Red,
                         _ => (),
                     };
-                    rotate_right(&grandparent, root);
                 } else {
                     if Rc::ptr_eq(&curr, &parent_left) {
                         curr = parent.clone();
-                        rotate_right(&parent, root);
                     }
                     let parent = match &*curr.borrow() {
                         RBNode::Node { parent, .. } => match parent.upgrade() {
@@ -570,7 +568,6 @@ pub fn delete_fixup(x: Tree, root: &mut Tree, x_parent: &Tree) {
                                     _ => (),
                                 };*/
                                 *w_color = Color::Red;
-                                //rotate_right(&w, root);
                                 flag = true;
                             }
                         }
@@ -584,7 +581,6 @@ pub fn delete_fixup(x: Tree, root: &mut Tree, x_parent: &Tree) {
                         },
                         (RBNode::Empty, RBNode::Empty) => {
                             *w_color = Color::Red;
-                            //rotate_right(&w, root);
                             flag = true;
                         },
                         _ => (),
@@ -593,7 +589,6 @@ pub fn delete_fixup(x: Tree, root: &mut Tree, x_parent: &Tree) {
                 _ => (),
             };
             if flag {
-                rotate_right(&w, root);
                 w = match &*curr_parent.borrow() {
                     RBNode::Node { right, .. } => right.clone(),
                     _ => Rc::new(RefCell::new(RBNode::Empty)),
@@ -642,7 +637,6 @@ pub fn delete_fixup(x: Tree, root: &mut Tree, x_parent: &Tree) {
                 _ => (),
             };
             if flag {
-                rotate_right(&curr_parent, root);
                 w = match &*curr_parent.borrow() {
                     RBNode::Node { left, .. } => left.clone(),
                     _ => w,
@@ -708,7 +702,6 @@ pub fn delete_fixup(x: Tree, root: &mut Tree, x_parent: &Tree) {
                         },
                         (RBNode::Empty, RBNode::Empty) => {
                             *w_color = Color::Red;
-                            //rotate_right(&w, root);
                             flag = true;
                         },
                         _ => (),
@@ -717,7 +710,6 @@ pub fn delete_fixup(x: Tree, root: &mut Tree, x_parent: &Tree) {
                 _ => (),
             };
             if flag {
-                //println!("root: {:?}", root);
                 rotate_left(&w, root);
                 w = match &*curr_parent.borrow() {
                     RBNode::Node { left, .. } => left.clone(),
@@ -746,12 +738,10 @@ pub fn delete_fixup(x: Tree, root: &mut Tree, x_parent: &Tree) {
                         _ => (),
                     }
                     flag = true;
-                    //rotate_right(&curr_parent, root);
                 }
                 _ => (),
             };
             if flag {
-                rotate_right(&curr_parent, root);
             }
             curr = root.clone();
         }
