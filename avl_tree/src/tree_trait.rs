@@ -48,7 +48,9 @@ impl TreeTrait for AVLTree {
                             right: Rc::new(RefCell::new(AVLNode::Empty)),
                             parent: Rc::downgrade(&curr),
                         };
-                        *height = std::cmp::max(left_node.height(), right.borrow().height()) + 1;
+                        *height =
+                            std::cmp::max(left_node.height(false), right.borrow().height(false))
+                                + 1;
 
                         curr = left.clone();
 
@@ -68,7 +70,9 @@ impl TreeTrait for AVLTree {
                             parent: Rc::downgrade(&curr),
                         };
 
-                        *height = std::cmp::max(left.borrow().height(), right_node.height()) + 1;
+                        *height =
+                            std::cmp::max(left.borrow().height(false), right_node.height(false))
+                                + 1;
 
                         curr = right.clone();
 
@@ -97,7 +101,9 @@ impl TreeTrait for AVLTree {
                     right,
                     ..
                 } => {
-                    *height = std::cmp::max(left.borrow().height(), right.borrow().height()) + 1;
+                    *height =
+                        std::cmp::max(left.borrow().height(false), right.borrow().height(false))
+                            + 1;
                 }
 
                 _ => (),
@@ -397,7 +403,10 @@ impl TreeTrait for AVLTree {
                     left,
                     right,
                     ..
-                } => *height = 1 + std::cmp::max(left.borrow().height(), right.borrow().height()),
+                } => {
+                    *height =
+                        1 + std::cmp::max(left.borrow().height(false), right.borrow().height(false))
+                }
                 _ => break,
             }
 
@@ -490,7 +499,7 @@ impl TreeTrait for AVLTree {
     }
 
     fn height(&self) -> u32 {
-        self.root.borrow().height()
+        self.root.borrow().height(false)
     }
 
     fn in_order(&self) -> Vec<u32> {
