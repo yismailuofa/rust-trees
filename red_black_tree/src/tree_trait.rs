@@ -4,10 +4,10 @@ use std::{
 };
 
 use tree::TreeTrait;
-use tree_ops_trait::{insert_fixup, rotate_right};
+use tree_ops_trait::insert_fixup;
 
 use crate::{
-    tree_ops_trait::{self, delete_fixup, find_node, rotate_left},
+    tree_ops_trait::{self, delete_fixup, find_node},
     Color, RBNode, RBTree,
 };
 
@@ -129,8 +129,8 @@ impl TreeTrait for RBTree {
             RBNode::Node { color, .. } => color.clone(),
             RBNode::Empty => panic!(), //should never happen
         };
-        let mut x=Rc::new(RefCell::new(RBNode::Empty));
-        let mut x_parent=Rc::new(RefCell::new(RBNode::Empty));
+        let mut x = Rc::new(RefCell::new(RBNode::Empty));
+        let mut x_parent = Rc::new(RefCell::new(RBNode::Empty));
         let mut end_flag = false;
         // case 1
         match &mut *z.borrow_mut() {
@@ -172,13 +172,10 @@ impl TreeTrait for RBTree {
                             RBNode::Empty => (),
                         }
                         end_flag = true;
-                        
                     }
                     _ => (),
                 }
-                if (!end_flag) {
-                    
-                
+                if !end_flag {
                     match *z_right.borrow() {
                         RBNode::Empty => {
                             x = z_left.clone();
@@ -215,13 +212,12 @@ impl TreeTrait for RBTree {
                         }
                         _ => (),
                     }
-                
                 }
             }
 
             RBNode::Empty => panic!(), //should never happen
         };
-        if (end_flag) {
+        if end_flag {
             if y_orig_color == Color::Black {
                 delete_fixup(x, &mut self.root, &x_parent);
             }

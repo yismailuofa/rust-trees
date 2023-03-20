@@ -3,6 +3,9 @@ mod print;
 pub mod tree_ops_trait;
 mod tree_trait;
 
+#[cfg(test)]
+mod test;
+
 use std::{
     cell::RefCell,
     rc::{Rc, Weak},
