@@ -141,30 +141,33 @@ impl TreeTrait for RBTree {
                     RBNode::Empty => {
                         x = z_right.clone();
                         //transplant(z, z.right)
-                        if let Some(z_parent) = z_parent.upgrade() {
-                            let mut z_parent_node = z_parent.borrow_mut();
-                            match &mut *z_parent_node {
-                                RBNode::Node {
-                                    left: z_parent_left,
-                                    right: z_parent_right,
-                                    ..
-                                } => {
-                                    if Rc::ptr_eq(&z_parent_left, &z) {
-                                        *z_parent_left = z_right.clone();
-                                    } else {
-                                        *z_parent_right = z_right.clone();
-                                    }
+                        let z_parent = match z_parent.upgrade() {
+                            Some(_) => z_parent.upgrade().unwrap(),
+                            None => Rc::new(RefCell::new(RBNode::Empty)),
+                        };
+                        let mut z_parent_node = z_parent.borrow_mut();
+                        match &mut *z_parent_node {
+                            RBNode::Node {
+                                left: z_parent_left,
+                                right: z_parent_right,
+                                ..
+                            } => {
+                                if Rc::ptr_eq(&z_parent_left, &z) {
+                                    *z_parent_left = z_right.clone();
+                                } else {
+                                    *z_parent_right = z_right.clone();
                                 }
-                                RBNode::Empty => self.root = z_right.clone(),
                             }
-                            // z.left.parent = z.parent
-                            match &mut *z_right.borrow_mut() {
-                                RBNode::Node { parent, .. } => {
-                                    *parent = Rc::downgrade(&z_parent);
-                                }
-                                RBNode::Empty => (),
-                            }
+                            RBNode::Empty => self.root = z_right.clone(),
                         }
+                        // z.left.parent = z.parent
+                        match &mut *z_right.borrow_mut() {
+                            RBNode::Node { parent, .. } => {
+                                *parent = Rc::downgrade(&z_parent);
+                            }
+                            RBNode::Empty => (),
+                        }
+                        
                         if y_orig_color == Color::Black {
                             delete_fixup(x, &mut self.root);
                         }
@@ -176,30 +179,33 @@ impl TreeTrait for RBTree {
                     RBNode::Empty => {
                         x = z_left.clone();
                         //transplant(z, z.left)
-                        if let Some(z_parent) = z_parent.upgrade() {
-                            let mut z_parent_node = z_parent.borrow_mut();
-                            match &mut *z_parent_node {
-                                RBNode::Node {
-                                    left: z_parent_left,
-                                    right: z_parent_right,
-                                    ..
-                                } => {
-                                    if Rc::ptr_eq(&z_parent_left, &z) {
-                                        *z_parent_left = z_left.clone();
-                                    } else {
-                                        *z_parent_right = z_left.clone();
-                                    }
+                        let z_parent = match z_parent.upgrade() {
+                            Some(_) => z_parent.upgrade().unwrap(),
+                            None => Rc::new(RefCell::new(RBNode::Empty)),
+                        };
+                        let mut z_parent_node = z_parent.borrow_mut();
+                        match &mut *z_parent_node {
+                            RBNode::Node {
+                                left: z_parent_left,
+                                right: z_parent_right,
+                                ..
+                            } => {
+                                if Rc::ptr_eq(&z_parent_left, &z) {
+                                    *z_parent_left = z_left.clone();
+                                } else {
+                                    *z_parent_right = z_left.clone();
                                 }
-                                RBNode::Empty => self.root = z_left.clone(),
                             }
-                            // z.left.parent = z.parent
-                            match &mut *z_left.borrow_mut() {
-                                RBNode::Node { parent, .. } => {
-                                    *parent = Rc::downgrade(&z_parent);
-                                }
-                                RBNode::Empty => (),
-                            }
+                            RBNode::Empty => self.root = z_left.clone(),
                         }
+                        // z.left.parent = z.parent
+                        match &mut *z_left.borrow_mut() {
+                            RBNode::Node { parent, .. } => {
+                                *parent = Rc::downgrade(&z_parent);
+                            }
+                            RBNode::Empty => (),
+                        }
+                        
                         if y_orig_color == Color::Black {
                             delete_fixup(x, &mut self.root);
                         }
@@ -254,50 +260,53 @@ impl TreeTrait for RBTree {
                 left: y_left,
                 ..
             } => {
-                if let Some(y_parent) = y_parent.upgrade() {
-                    if Rc::ptr_eq(&y_parent, &z) {
-                        match &mut *x.borrow_mut() {
-                            RBNode::Node { parent, .. } => {
-                                *parent = Rc::downgrade(&y);
-                            }
-                            RBNode::Empty => (),
+                let y_parent = match y_parent.upgrade() {
+                    Some(_) => y_parent.upgrade().unwrap(),
+                    None => Rc::new(RefCell::new(RBNode::Empty)),
+                };
+                if Rc::ptr_eq(&y_parent, &z) {
+                    match &mut *x.borrow_mut() {
+                        RBNode::Node { parent, .. } => {
+                            *parent = Rc::downgrade(&y);
                         }
-                    } else {
-                        // transplant(y, y.right)
-                        let mut y_parent_node = y_parent.borrow_mut();
-                        match &mut *y_parent_node {
-                            RBNode::Node {
-                                left: y_parent_left,
-                                right: y_parent_right,
-                                ..
-                            } => {
-                                if Rc::ptr_eq(&y_parent_left, &y) {
-                                    *y_parent_left = y_right.clone();
-                                } else {
-                                    *y_parent_right = y_right.clone();
-                                }
-                            }
-                            RBNode::Empty => self.root = y_right.clone(),
-                        }
-                        // y.right.parent = y.parent
-                        match &mut *y_right.borrow_mut() {
-                            RBNode::Node { parent, .. } => {
-                                *parent = Rc::downgrade(&y_parent);
-                            }
-                            RBNode::Empty => (),
-                        }
-                        // y.right = z.right
-                        match &*z.borrow() {
-                            RBNode::Node { right, .. } => {
-                                *y_right = right.clone();
-                            }
-                            RBNode::Empty => panic!(), //should never happen
-                        }
-
-                        flag = true;
+                        RBNode::Empty => (),
                     }
-                    //transplant(z, y)
+                } else {
+                    // transplant(y, y.right)
+                    let mut y_parent_node = y_parent.borrow_mut();
+                    match &mut *y_parent_node {
+                        RBNode::Node {
+                            left: y_parent_left,
+                            right: y_parent_right,
+                            ..
+                        } => {
+                            if Rc::ptr_eq(&y_parent_left, &y) {
+                                *y_parent_left = y_right.clone();
+                            } else {
+                                *y_parent_right = y_right.clone();
+                            }
+                        }
+                        RBNode::Empty => self.root = y_right.clone(),
+                    }
+                    // y.right.parent = y.parent
+                    match &mut *y_right.borrow_mut() {
+                        RBNode::Node { parent, .. } => {
+                            *parent = Rc::downgrade(&y_parent);
+                        }
+                        RBNode::Empty => (),
+                    }
+                    // y.right = z.right
+                    match &*z.borrow() {
+                        RBNode::Node { right, .. } => {
+                            *y_right = right.clone();
+                        }
+                        RBNode::Empty => panic!(), //should never happen
+                    }
+
+                    flag = true;
                 }
+                    //transplant(z, y)
+                
             }
             RBNode::Empty => panic!(), //should never happen
         };
@@ -310,7 +319,7 @@ impl TreeTrait for RBTree {
                     ..
                 } => match &mut *y_right.borrow_mut() {
                     RBNode::Node { parent, .. } => {
-                        *parent = Rc::downgrade(&y);
+                        *parent = Rc::downgrade(&y);//look here
                     }
                     RBNode::Empty => (),
                 },
@@ -325,52 +334,55 @@ impl TreeTrait for RBTree {
                 color: z_color,
                 ..
             } => {
-                if let Some(z_parent) = z_parent.upgrade() {
-                    let mut z_parent_node = z_parent.borrow_mut();
-                    match &mut *z_parent_node {
-                        RBNode::Node {
-                            left: z_parent_left,
-                            right: z_parent_right,
-                            ..
-                        } => {
-                            if Rc::ptr_eq(&z_parent_left, &z) {
-                                *z_parent_left = y.clone();
-                            } else {
-                                *z_parent_right = y.clone();
-                            }
+                let z_parent = match z_parent.upgrade() {
+                    Some(_) => z_parent.upgrade().unwrap(),
+                    None => Rc::new(RefCell::new(RBNode::Empty)),
+                };
+                let mut z_parent_node = z_parent.borrow_mut();
+                match &mut *z_parent_node {
+                    RBNode::Node {
+                        left: z_parent_left,
+                        right: z_parent_right,
+                        ..
+                    } => {
+                        if Rc::ptr_eq(&z_parent_left, &z) {
+                            *z_parent_left = y.clone();
+                        } else {
+                            *z_parent_right = y.clone();
                         }
-                        RBNode::Empty => self.root = y.clone(),
                     }
-                    // y.parent = z.parent
-                    match &mut *y.borrow_mut() {
-                        RBNode::Node { parent, .. } => {
-                            *parent = Rc::downgrade(&z_parent);
-                        }
-                        RBNode::Empty => (),
+                    RBNode::Empty => self.root = y.clone(),
+                }
+                // y.parent = z.parent
+                match &mut *y.borrow_mut() {
+                    RBNode::Node { parent, .. } => {
+                        *parent = Rc::downgrade(&z_parent);
                     }
-                    // y.left = z.left
-                    match &mut *y.borrow_mut() {
-                        RBNode::Node { left, .. } => {
-                            *left = z_left.clone();
-                        }
-                        RBNode::Empty => (),
+                    RBNode::Empty => (),
+                }
+                // y.left = z.left
+                match &mut *y.borrow_mut() {
+                    RBNode::Node { left, .. } => {
+                        *left = z_left.clone();
                     }
-                    // y.left.parent = y
-                    match &mut *z_left.borrow_mut() {
-                        RBNode::Node { parent, .. } => {
-                            *parent = Rc::downgrade(&y);
-                        }
-                        RBNode::Empty => (),
+                    RBNode::Empty => (),
+                }
+                // y.left.parent = y
+                match &mut *z_left.borrow_mut() {
+                    RBNode::Node { parent, .. } => {
+                        *parent = Rc::downgrade(&y);
                     }
-                    // y.color = z.color
-                    match &mut *y.borrow_mut() {
-                        RBNode::Node { color, .. } => {
-                            *color = z_color.clone();
-                        }
-                        RBNode::Empty => (),
+                    RBNode::Empty => (),
+                }
+                // y.color = z.color
+                match &mut *y.borrow_mut() {
+                    RBNode::Node { color, .. } => {
+                        *color = z_color.clone();
                     }
+                    RBNode::Empty => (),
                 }
             }
+        
             RBNode::Empty => panic!(), //should never happen
         };
 
