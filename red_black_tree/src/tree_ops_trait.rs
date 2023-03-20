@@ -249,7 +249,7 @@ pub fn insert_fixup(x: Tree, root: &mut Tree) {
                 Some(n) => n,
                 None => break,
             },
-            RBNode::Empty => break,
+            RBNode::Empty => break, // Should be a case 4
         };
 
         let uncle = match &*grandparent.borrow() {
@@ -299,7 +299,7 @@ pub fn insert_fixup(x: Tree, root: &mut Tree) {
                 if Rc::ptr_eq(&parent, &grandparent_left) {
                     if Rc::ptr_eq(&curr, &parent_right) {
                         curr = parent.clone();
-                        rotate_left(&parent, root);
+                        rotate_left(&curr, root);
                     }
 
                     let parent = match &*curr.borrow() {
@@ -327,9 +327,12 @@ pub fn insert_fixup(x: Tree, root: &mut Tree) {
                         RBNode::Node { color, .. } => *color = Color::Red,
                         _ => (),
                     };
+
+                    rotate_right(&grandparent, root);
                 } else {
                     if Rc::ptr_eq(&curr, &parent_left) {
                         curr = parent.clone();
+                        rotate_right(&curr, root);
                     }
                     let parent = match &*curr.borrow() {
                         RBNode::Node { parent, .. } => match parent.upgrade() {

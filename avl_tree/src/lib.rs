@@ -11,30 +11,28 @@ use std::{
     rc::{Rc, Weak},
 };
 
-use tree::TreeTrait;
-
 pub struct AVLTree {
     pub root: Tree,
 }
 
 impl Default for AVLTree {
     fn default() -> Self {
-        let mut tree = AVLTree {
+        let tree = AVLTree {
             root: Rc::new(RefCell::new(AVLNode::Empty)),
         };
 
-        tree.insert_node(10);
-        tree.insert_node(20);
-        tree.insert_node(30);
-        tree.insert_node(40);
-        tree.insert_node(50);
-        tree.insert_node(60);
-        tree.insert_node(5);
-        tree.insert_node(15);
-        tree.insert_node(35);
-        tree.delete_node(20);
-        tree.delete_node(10);
-        tree.delete_node(15);
+        // tree.insert_node(10);
+        // tree.insert_node(20);
+        // tree.insert_node(30);
+        // tree.insert_node(40);
+        // tree.insert_node(50);
+        // tree.insert_node(60);
+        // tree.insert_node(5);
+        // tree.insert_node(15);
+        // tree.insert_node(35);
+        // tree.delete_node(20);
+        // tree.delete_node(10);
+        // tree.delete_node(15);
 
         tree
     }

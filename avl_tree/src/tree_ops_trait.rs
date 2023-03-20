@@ -1,34 +1,32 @@
 use crate::{AVLNode, Tree};
 use std::{cell::RefCell, rc::Rc};
 
-/**
-Rotates left
-   Ex:
-         y                               x
-        / \                             /  \
-       x   T3                          T1   y
-      / \       < - - - - - - -            / \
-     T1  T2     Left Rotation            T2  T3
+// Rotates left
+//    Ex:
+//          y                               x
+//         / \                             /  \
+//        x   T3                          T1   y
+//       / \       < - - - - - - -            / \
+//      T1  T2     Left Rotation            T2  T3
 
-   # Rotation
-   parent = x.parent
-   y = x.right
-   T2 = y.left
+//    # Rotation
+//    parent = x.parent
+//    y = x.right
+//    T2 = y.left
 
-   y.left = x
-   x.right = T2
+//    y.left = x
+//    x.right = T2
 
-   if T2:
-       T2.parent = x
-   y.parent = parent
+//    if T2:
+//        T2.parent = x
+//    y.parent = parent
 
-   if parent is None:
-       self.root = y
-   elif parent.left == x:
-       parent.left = y
-   elif y.parent.right == x:
-       parent.right = y
-*/
+//    if parent is None:
+//        self.root = y
+//    elif parent.left == x:
+//        parent.left = y
+//    elif y.parent.right == x:
+//        parent.right = y
 
 pub fn rotate_left(x: &Tree, root: &mut Tree) -> Tree {
     match &mut *x.borrow_mut() {
@@ -108,36 +106,34 @@ pub fn rotate_left(x: &Tree, root: &mut Tree) -> Tree {
     }
 }
 
-/**
-Rotates right
-Ex:
+// Rotates right
+// Ex:
 
-         y                               x
-        / \     Right Rotation          /  \
-       x   T3   - - - - - - - >        T1   y
-      / \                                  / \
-     T1  T2                              T2  T3
-# Rotation
-parent = y.parent
+//          y                               x
+//         / \     Right Rotation          /  \
+//        x   T3   - - - - - - - >        T1   y
+//       / \                                  / \
+//      T1  T2                              T2  T3
+// # Rotation
+// parent = y.parent
 
-x = y.left
-T2 = x.right
+// x = y.left
+// T2 = x.right
 
-x.right = y
-y.left = T2
+// x.right = y
+// y.left = T2
 
-if T2:
-    T2.parent = y
-x.parent = parent
+// if T2:
+//     T2.parent = y
+// x.parent = parent
 
+// if parent is None:
+//     self.root = x
+// if parent.left == y:
+//     parent.left = x
+// elif y.parent.right == y:
+//     parent.right = x
 
-if parent is None:
-    self.root = x
-if parent.left == y:
-    parent.left = x
-elif y.parent.right == y:
-    parent.right = x
-*/
 pub fn rotate_right(y: &Tree, root: &mut Tree) -> Tree {
     match &mut *y.borrow_mut() {
         AVLNode::Node {

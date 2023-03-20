@@ -499,7 +499,7 @@ impl TreeTrait for AVLTree {
     }
 
     fn height(&self) -> u32 {
-        self.root.borrow().height(false)
+        self.root.borrow().height(true)
     }
 
     fn in_order(&self) -> Vec<u32> {
