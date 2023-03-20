@@ -215,3 +215,43 @@ pub fn rotate_right(y: &Tree, root: &mut Tree) -> Tree {
         _ => Rc::new(RefCell::new(AVLNode::Empty)),
     }
 }
+
+
+pub fn find_node(root: &Tree, _key: u32) -> Option<Tree> {
+    let mut curr = root.clone();
+
+    while let AVLNode::Node {
+        key,
+        left,
+        right,
+        ..
+    } = &*curr.clone().borrow()
+    {
+        match _key.cmp(key) {
+            std::cmp::Ordering::Less => {
+                let left_node = left.borrow_mut();
+
+                if let AVLNode::Empty = *left_node {
+                    println!("Node not found");
+                    return None;
+                } else {
+                    curr = left.clone();
+                }
+            }
+            std::cmp::Ordering::Greater => {
+                let right_node = right.borrow_mut();
+
+                if let AVLNode::Empty = *right_node {
+                    println!("Node not found");
+                    return None;
+                } else {
+                    curr = right.clone();
+                }
+            }
+            std::cmp::Ordering::Equal => {
+                return Some(curr);
+            }
+        }
+    }
+    None
+}
