@@ -489,7 +489,7 @@ pub fn delete_fixup(x: Tree, root: &mut Tree) {
 
         let curr_parent = match curr_parent.upgrade() {
             Some(n) => n,
-            None => break, //maybe set to panic
+            None => panic!(), //maybe set to panic
         };
 
         let curr_parent_left = match &*curr_parent.borrow() {
