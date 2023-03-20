@@ -595,6 +595,7 @@ pub fn delete_fixup(x: Tree, root: &mut Tree, x_parent: &Tree) {
                 _ => (),
             };
             if flag {
+                rotate_right(&w, root);
                 w = match &*curr_parent.borrow() {
                     RBNode::Node { right, .. } => right.clone(),
                     _ => Rc::new(RefCell::new(RBNode::Empty)),
@@ -643,6 +644,7 @@ pub fn delete_fixup(x: Tree, root: &mut Tree, x_parent: &Tree) {
                 _ => (),
             };
             if flag {
+                rotate_right(&curr_parent, root);
                 w = match &*curr_parent.borrow() {
                     RBNode::Node { left, .. } => left.clone(),
                     _ => w,
@@ -750,7 +752,9 @@ pub fn delete_fixup(x: Tree, root: &mut Tree, x_parent: &Tree) {
                 }
                 _ => (),
             };
-            if flag {}
+            if flag {
+                rotate_right(&curr_parent, root);
+            }
             curr = root.clone();
         }
     }
