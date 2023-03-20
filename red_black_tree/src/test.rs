@@ -12,7 +12,7 @@ use tree::TreeTrait;
 fn monkey_test() {
     let mut tree = RBTree::default();
     let mut rng = thread_rng();
-    let mut vec: Vec<u32> = (0..1000).collect();
+    let mut vec: Vec<u32> = (0..10000).collect();
 
     vec.shuffle(&mut rng);
 
@@ -23,7 +23,7 @@ fn monkey_test() {
     vec.shuffle(&mut rng);
 
     // delete n-1 nodes
-    let mut counter = 1000;
+    let mut counter = 10000;
     for i in &vec[0..vec.len() - 1] {
         tree.delete_node(*i);
 

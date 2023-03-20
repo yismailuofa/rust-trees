@@ -12,7 +12,7 @@ use tree::TreeTrait;
 fn monkey_test() {
     let mut tree = AVLTree::default();
     let mut rng = thread_rng();
-    let mut vec: Vec<u32> = (0..10).collect();
+    let mut vec: Vec<u32> = (0..10000).collect();
 
     vec.shuffle(&mut rng);
 
@@ -23,7 +23,7 @@ fn monkey_test() {
     vec.shuffle(&mut rng);
 
     // delete n-1 nodes
-    let mut counter = 10;
+    let mut counter = 10000;
     for i in &vec[0..vec.len() - 1] {
         tree.delete_node(*i);
 
