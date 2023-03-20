@@ -120,7 +120,7 @@ if parent.left == y:
 elif y.parent.right == y:
     parent.right = x
 */
-fn rotate_right(y: &Tree, root: &mut Tree) {
+pub fn rotate_right(y: &Tree, root: &mut Tree) {
     println!("Rotate right with node: {:#?}", y);
     match &mut *y.borrow_mut() {
         RBNode::Node { left, parent, .. } => {

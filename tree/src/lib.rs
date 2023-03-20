@@ -46,6 +46,8 @@ pub fn prompt_user(tree: &mut impl TreeTrait) {
             let value = input.trim().parse::<u32>().unwrap();
             tree.delete_node(value);
             println!("Value deleted successfully");
+
+            tree.print_tree();
         }
         "3" => {
             println!("Number of leaves: {}", tree.count_leaves());

@@ -10,4 +10,3 @@ fn main() {
         prompt_user(&mut tree);
     }
 }
-// i love rust 😎

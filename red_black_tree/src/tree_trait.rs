@@ -1,13 +1,13 @@
 use std::{
     cell::RefCell,
-    rc::{Rc, Weak},
+    rc::{self, Rc, Weak},
 };
 
 use tree::TreeTrait;
-use tree_ops_trait::insert_fixup;
+use tree_ops_trait::{insert_fixup, rotate_right};
 
 use crate::{
-    tree_ops_trait::{self, delete_fixup, find_node},
+    tree_ops_trait::{self, delete_fixup, find_node, rotate_left},
     Color, RBNode, RBTree,
 };
 
@@ -108,13 +108,15 @@ impl TreeTrait for RBTree {
     //         y.left.p = y
     //         y.color = z.color
 
+    //      if x is nil and no kids: do the fixup manually
+
     //     if y_orig_color == BLACK:
     //         self.delete_fixup(x)
     fn delete_node(&mut self, _key: u32) {
         //delete node with key
 
         //find node with key
-        let mut z = match find_node(&self.root, _key) {
+        let z = match find_node(&self.root, _key) {
             Some(node) => node,
             None => {
                 println!("Node with key {} not found", _key);
@@ -122,20 +124,19 @@ impl TreeTrait for RBTree {
             }
         };
 
-        let mut y = z.clone();
+        let y = z.clone();
         let mut y_orig_color = match &*y.borrow() {
             RBNode::Node { color, .. } => color.clone(),
             RBNode::Empty => panic!(), //should never happen
         };
-        let mut x;
+        let x;
         // case 1
         match &mut *z.borrow_mut() {
             RBNode::Node {
-                key: z_key,
-                color: z_color,
                 left: z_left,
                 right: z_right,
                 parent: z_parent,
+                ..
             } => {
                 match *z_left.borrow() {
                     RBNode::Empty => {
@@ -167,7 +168,7 @@ impl TreeTrait for RBTree {
                             }
                             RBNode::Empty => (),
                         }
-                        
+
                         if y_orig_color == Color::Black {
                             delete_fixup(x, &mut self.root);
                         }
@@ -205,7 +206,7 @@ impl TreeTrait for RBTree {
                             }
                             RBNode::Empty => (),
                         }
-                        
+
                         if y_orig_color == Color::Black {
                             delete_fixup(x, &mut self.root);
                         }
@@ -253,11 +254,11 @@ impl TreeTrait for RBTree {
         // if y.p == z:
         //     x.p = y
         let mut flag = false;
+        let mut case_3_flag = false;
         match &mut *y.borrow_mut() {
             RBNode::Node {
                 parent: y_parent,
                 right: y_right,
-                left: y_left,
                 ..
             } => {
                 let y_parent = match y_parent.upgrade() {
@@ -305,21 +306,15 @@ impl TreeTrait for RBTree {
 
                     flag = true;
                 }
-                    //transplant(z, y)
-                
+                //transplant(z, y)
             }
             RBNode::Empty => panic!(), //should never happen
         };
         if flag {
             match &*y.borrow_mut() {
-                RBNode::Node {
-                    parent: y_parent,
-                    right: y_right,
-                    left: y_left,
-                    ..
-                } => match &mut *y_right.borrow_mut() {
+                RBNode::Node { right: y_right, .. } => match &mut *y_right.borrow_mut() {
                     RBNode::Node { parent, .. } => {
-                        *parent = Rc::downgrade(&y);//look here
+                        *parent = Rc::downgrade(&y); //look here
                     }
                     RBNode::Empty => (),
                 },
@@ -381,10 +376,42 @@ impl TreeTrait for RBTree {
                     }
                     RBNode::Empty => (),
                 }
+
+                // We need to to handle the case where x is empty
+                match &*x.borrow() {
+                    RBNode::Empty => case_3_flag = true,
+                    _ => (),
+                }
             }
-        
+
             RBNode::Empty => panic!(), //should never happen
         };
+
+        if case_3_flag {
+            // rotate left on y.left
+            // match &*y.borrow() {
+            //     RBNode::Node { left, .. } => rotate_left(&left, &mut self.root),
+            //     _ => (),
+            // };
+            let left = match &*y.borrow() {
+                RBNode::Node { left, .. } => left.clone(),
+                _ => Rc::new(RefCell::new(RBNode::Empty)),
+            };
+
+            rotate_left(&left, &mut self.root);
+
+            rotate_right(&y, &mut self.root);
+
+            // set root color to black
+            match &mut *self.root.borrow_mut() {
+                RBNode::Node { color, .. } => {
+                    *color = Color::Black;
+                }
+                RBNode::Empty => (),
+            }
+
+            return;
+        }
 
         if y_orig_color == Color::Black {
             delete_fixup(x, &mut self.root);
