@@ -1,6 +1,6 @@
 use std::{
     cell::RefCell,
-    rc::{self, Rc, Weak},
+    rc::{Rc, Weak},
 };
 
 use tree::TreeTrait;
