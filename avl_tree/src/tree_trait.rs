@@ -261,23 +261,16 @@ impl TreeTrait for AVLTree {
 
         let mut curr = self.root.clone();
 
-        while let AVLNode::Node { key, .. } = &*curr.clone().borrow_mut() {
+        while let AVLNode::Node {
+            key, left, right, ..
+        } = &*curr.clone().borrow()
+        {
             match _key.cmp(key) {
                 std::cmp::Ordering::Less => {
-                    let left = match &*curr.borrow() {
-                        AVLNode::Node { left, .. } => left.clone(),
-                        _ => return,
-                    };
-
-                    curr = left;
+                    curr = left.clone();
                 }
                 std::cmp::Ordering::Greater => {
-                    let right = match &*curr.borrow() {
-                        AVLNode::Node { right, .. } => right.clone(),
-                        _ => return,
-                    };
-
-                    curr = right;
+                    curr = right.clone();
                 }
                 _ => break,
             }
@@ -328,7 +321,17 @@ impl TreeTrait for AVLTree {
                             *right = child.clone();
                         }
                     }
-                    AVLNode::Empty => flag = true, // May fuck up hard
+                    AVLNode::Empty => flag = true,
+                }
+
+                match &mut *child.borrow_mut() {
+                    AVLNode::Node {
+                        parent: node_parent,
+                        ..
+                    } => {
+                        *node_parent = Rc::downgrade(&parent.clone());
+                    }
+                    _ => (),
                 }
             } else {
                 let mut successor = right.clone();
@@ -343,22 +346,44 @@ impl TreeTrait for AVLTree {
                     successor = left.clone();
                 }
 
-                println!("Successor: {:#?}", successor.borrow());
-
-                if let AVLNode::Node { key: suc_key, .. } = &*successor.borrow() {
-                    *key = *suc_key;
+                match &*successor.borrow() {
+                    AVLNode::Node { key: suc_key, .. } => *key = *suc_key,
+                    _ => (),
                 }
 
-                if let AVLNode::Node { left, .. } = &mut *successor_parent.borrow_mut() {
-                    if Rc::ptr_eq(&successor, left) {
-                        *left = right.clone()
+                // Check if the curr is the successor's parent
+                if Rc::ptr_eq(&curr, &successor_parent) {
+                    if Rc::ptr_eq(&successor, right) {
+                        *right = match &*successor.borrow() {
+                            AVLNode::Node { right, .. } => right.clone(),
+                            _ => Rc::new(RefCell::new(AVLNode::Empty)),
+                        };
                     } else {
-                        *right = right.clone()
+                        *left = match &*successor.borrow() {
+                            AVLNode::Node { right, .. } => right.clone(),
+                            _ => Rc::new(RefCell::new(AVLNode::Empty)),
+                        };
                     }
-                };
-            }
-        };
-
+                } else {
+                    match &mut *successor_parent.borrow_mut() {
+                        AVLNode::Node { left, .. } => {
+                            if Rc::ptr_eq(&successor, left) {
+                                *left = match &*successor.borrow() {
+                                    AVLNode::Node { right, .. } => right.clone(),
+                                    _ => Rc::new(RefCell::new(AVLNode::Empty)),
+                                };
+                            } else {
+                                *right = match &*successor.borrow() {
+                                    AVLNode::Node { right, .. } => right.clone(),
+                                    _ => Rc::new(RefCell::new(AVLNode::Empty)),
+                                };
+                            }
+                        }
+                        _ => (),
+                    };
+                }
+            };
+        }
         if flag {
             self.root = child;
         }
