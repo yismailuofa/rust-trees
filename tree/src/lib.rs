@@ -36,8 +36,6 @@ pub fn prompt_user(tree: &mut impl TreeTrait) {
 
             tree.insert_node(value);
 
-            println!("Value inserted successfully");
-
             tree.print_tree();
         }
         "2" => {
@@ -46,7 +44,6 @@ pub fn prompt_user(tree: &mut impl TreeTrait) {
             std::io::stdin().read_line(&mut input).unwrap();
             let value = input.trim().parse::<u32>().unwrap();
             tree.delete_node(value);
-            println!("Value deleted successfully");
 
             tree.print_tree();
         }
